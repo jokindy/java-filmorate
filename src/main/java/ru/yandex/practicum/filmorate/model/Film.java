@@ -15,7 +15,7 @@ public class Film extends AbstractModel {
     private String title;
 
     @NotNull
-    @Size(max = 199)
+    @Size(max = 200)
     @NotBlank(message = "Description may not be blank")
     private String description;
 

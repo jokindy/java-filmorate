@@ -90,7 +90,7 @@ class FilmControllerTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(filmWith200CharDescription))
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 
     @Order(7)
