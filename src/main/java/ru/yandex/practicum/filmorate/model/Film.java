@@ -23,7 +23,7 @@ public class Film extends AbstractModel {
     private LocalDate releaseDate;
 
     @NotNull
-    @PositiveOrZero(message = "Duration must be positive")
+    @Positive(message = "Duration must be positive")
     private int duration;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
