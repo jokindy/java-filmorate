@@ -11,8 +11,8 @@ import java.time.LocalDate;
 public class Film extends AbstractModel {
 
     @NotNull
-    @NotBlank(message = "Title may not be blank")
-    private String title;
+    @NotBlank(message = "Name may not be blank")
+    private String name;
 
     @NotNull
     @Size(max = 200)
@@ -23,11 +23,11 @@ public class Film extends AbstractModel {
     private LocalDate releaseDate;
 
     @NotNull
-    @Positive(message = "Duration must be positive")
+    @PositiveOrZero(message = "Duration must be positive")
     private int duration;
 
-    public Film(String title, String description, LocalDate releaseDate, int duration) {
-        this.title = title;
+    public Film(String name, String description, LocalDate releaseDate, int duration) {
+        this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
