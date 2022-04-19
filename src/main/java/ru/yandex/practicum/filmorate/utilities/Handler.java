@@ -8,19 +8,19 @@ import ru.yandex.practicum.filmorate.model.AbstractModel;
 @Slf4j
 public class Handler<T extends AbstractModel> {
 
-    public String handle(RequestMethod method, Storage<T> storage, T t) {
+    public String handle(RequestMethod method, Storage<T> storage, T model) {
         try {
-            if (t.validate()) {
+            if (model.validate()) {
                 throw new ValidationException("Something wrong. Check the data.");
             }
             switch (method) {
                 case POST: {
-                    String s = storage.add(t);
+                    String s = storage.add(model);
                     log.info(s);
                     return s;
                 }
                 case PUT: {
-                    String s = storage.put(t);
+                    String s = storage.put(model);
                     log.info(s);
                     return s;
                 }

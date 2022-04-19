@@ -10,6 +10,8 @@ import java.time.LocalDate;
 @Data
 public class Film extends AbstractModel {
 
+    private final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+
     @NotNull
     @NotBlank(message = "Name may not be blank")
     private String name;
@@ -23,7 +25,7 @@ public class Film extends AbstractModel {
     private LocalDate releaseDate;
 
     @NotNull
-    @PositiveOrZero(message = "Duration must be positive")
+    @Positive(message = "Duration must be positive")
     private int duration;
 
     public Film(String name, String description, LocalDate releaseDate, int duration) {
@@ -35,6 +37,6 @@ public class Film extends AbstractModel {
 
     @Override
     public boolean validate() {
-        return releaseDate.isBefore(LocalDate.of(1895, 12, 28));
+        return releaseDate.isBefore(CINEMA_BIRTHDAY);
     }
 }

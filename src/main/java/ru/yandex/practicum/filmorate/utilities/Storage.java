@@ -17,25 +17,25 @@ public class Storage<T extends AbstractModel> {
         this.className = className;
     }
 
-    public String add(T t) throws ValidationException {
-        if (map.containsValue(t)) {
+    public String add(T model) throws ValidationException {
+        if (map.containsValue(model)) {
             throw new ValidationException("This " + className.toLowerCase() + " is already added");
         }
         id++;
-        t.setId(id);
-        map.put(id, t);
+        model.setId(id);
+        map.put(id, model);
         return className + " id: " + id + " added.";
     }
 
-    public String put(T t) throws ValidationException {
-        int tId = t.getId();
-        if (map.containsKey(tId) && map.containsValue(t)) {
-            throw new ValidationException(className + " id: " + tId + " is the same");
-        } else if (map.containsKey(tId)) {
-            map.replace(tId, t);
-            return className + " id: " + tId + " updated";
+    public String put(T model) throws ValidationException {
+        int modelId = model.getId();
+        if (map.containsKey(modelId) && map.containsValue(model)) {
+            throw new ValidationException(className + " id: " + modelId + " is the same");
+        } else if (map.containsKey(modelId)) {
+            map.replace(modelId, model);
+            return className + " id: " + modelId + " updated";
         } else {
-            return add(t);
+            return add(model);
         }
     }
 

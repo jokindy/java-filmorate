@@ -5,7 +5,6 @@ import lombok.Data;
 @Data
 public abstract class AbstractModel {
 
-    int id;
-
+    private int id;
     public abstract boolean validate();
 }
