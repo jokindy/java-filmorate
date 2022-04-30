@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.utilities;
 
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.AbstractModel;
 
 import java.util.HashMap;
@@ -17,9 +17,9 @@ public class Storage<T extends AbstractModel> {
         this.className = className;
     }
 
-    public String add(T model) throws ValidationException {
+    public String add(T model) {
         if (map.containsValue(model)) {
-            throw new ValidationException("This " + className.toLowerCase() + " is already added");
+            throw new ModelAlreadyExistException("This " + className.toLowerCase() + " is already added");
         }
         id++;
         model.setId(id);
@@ -27,10 +27,10 @@ public class Storage<T extends AbstractModel> {
         return className + " id: " + id + " added.";
     }
 
-    public String put(T model) throws ValidationException {
+    public String put(T model) {
         int modelId = model.getId();
         if (map.containsKey(modelId) && map.containsValue(model)) {
-            throw new ValidationException(className + " id: " + modelId + " is the same");
+            throw new ModelAlreadyExistException(className + " id: " + modelId + " is the same");
         } else if (map.containsKey(modelId)) {
             map.replace(modelId, model);
             return className + " id: " + modelId + " updated";

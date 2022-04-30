@@ -6,5 +6,5 @@ import lombok.Data;
 public abstract class AbstractModel {
 
     private int id;
-    public abstract boolean validate();
+    public abstract void validate();
 }

@@ -2,10 +2,13 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 
+@Getter
 @EqualsAndHashCode(callSuper = false)
 @Data
 public class Film extends AbstractModel {
@@ -24,6 +27,8 @@ public class Film extends AbstractModel {
     @NotNull
     private LocalDate releaseDate;
 
+    private int id;
+
     @NotNull
     @Positive(message = "Duration must be positive")
     private int duration;
@@ -33,10 +38,11 @@ public class Film extends AbstractModel {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        validate();
     }
 
     @Override
-    public boolean validate() {
-        return releaseDate.isBefore(CINEMA_BIRTHDAY);
+    public void validate() {
+        if (releaseDate.isBefore(CINEMA_BIRTHDAY)) throw new ValidationException("Film can't be SO OLD!");
     }
 }

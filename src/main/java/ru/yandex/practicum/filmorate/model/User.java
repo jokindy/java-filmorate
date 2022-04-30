@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -12,13 +13,13 @@ import java.time.LocalDate;
 @Data
 public class User extends AbstractModel {
 
-    @NotNull
-    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}")
+    @NotNull(message = "Email cannot be null")
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}", message = "Field must be in E-mail format")
     @NotEmpty(message = "Email cannot be empty")
     private String email;
 
-    @NotNull
-    @NotBlank(message = "Login may not be blank")
+    @NotBlank(message = "Login cannot be blank")
+    @NotNull(message = "Login cannot be null")
     private String login;
 
     private String name;
@@ -35,10 +36,16 @@ public class User extends AbstractModel {
             this.name = name;
         }
         this.birthday = birthday;
+        validate();
     }
 
     @Override
-    public boolean validate() {
-        return login.contains(" ") || birthday.isAfter(LocalDate.now());
+    public void validate() {
+        if (login != null && login.contains(" ")) {
+            throw new ValidationException("Login can't contains spaces");
+        }
+        if (birthday.isAfter(LocalDate.now())) {
+            throw new ValidationException("Birthday can't be in future.");
+        }
     }
 }
