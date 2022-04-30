@@ -2,14 +2,11 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.utilities.Handler;
 import ru.yandex.practicum.filmorate.utilities.Storage;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.Map;
-
-import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @Slf4j
 @RestController
@@ -25,11 +22,15 @@ public class UserController {
 
     @PostMapping("/users")
     public String add(@Valid @RequestBody User user) {
-        return new Handler<User>().handle(POST, users, user);
+        String s = users.add(user);
+        log.info(s);
+        return s;
     }
 
     @PutMapping("/users")
     public String update(@Valid @RequestBody User user) {
-        return new Handler<User>().handle(PUT, users, user);
+        String s = users.put(user);
+        log.info(s);
+        return s;
     }
 }
