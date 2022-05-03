@@ -12,9 +12,6 @@ public class TestFilms {
     public static final Film updatedFilm = new Film("Catman", "Man without fear",
             LocalDate.of(2005, 10, 3), 135);
 
-    public static final Film oldFilm = new Film("Gentleman", "Man with honor",
-            LocalDate.of(1885, 7, 5), 120);
-
     public static final Film filmWithEmptyTitle = new Film(null, "Man with honor",
             LocalDate.of(2000, 4, 15), 120);
 

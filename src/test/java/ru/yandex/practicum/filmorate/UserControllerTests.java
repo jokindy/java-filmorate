@@ -45,18 +45,15 @@ class UserControllerTests {
     @Order(2)
     @Test
     public void shouldPostTheCommonUserTwice() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(user))
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("This user is already added", content);
+                .andExpect(status().isConflict());
     }
 
-    @Order(4)
+    @Order(3)
     @Test
     public void shouldPostTheUserWithEmptyEmail() throws Exception {
         mockMvc.perform(
@@ -67,7 +64,7 @@ class UserControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Order(5)
+    @Order(4)
     @Test
     public void shouldPostTheUserWithEmptyLogin() throws Exception {
         mockMvc.perform(
@@ -78,21 +75,18 @@ class UserControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Order(6)
+    @Order(5)
     @Test
     public void shouldPostTheUserWithLoginWithSpaces() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userWithLoginWithSpaces))
+                                .content(userWithLoginWithSpacesJSON)
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("Something wrong. Check the data.", content);
+                .andExpect(status().isBadRequest());
     }
 
-    @Order(7)
+    @Order(6)
     @Test
     public void shouldEditNameWithEmptyName() throws Exception {
         userWithEmptyName.setId(1);
@@ -104,35 +98,29 @@ class UserControllerTests {
                 .andExpect(status().isOk());
     }
 
-    @Order(8)
+    @Order(7)
     @Test
     public void shouldPostUserFromFuture() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userFromFuture))
+                                .content(userFromFutureJSON)
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("Something wrong. Check the data.", content);
+                .andExpect(status().isBadRequest());
     }
 
-    @Order(9)
+    @Order(8)
     @Test
     public void shouldPutTheCommonUserTwice() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         put("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(user))
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("This user is already added", content);
+                .andExpect(status().isConflict());
     }
 
-    @Order(10)
+    @Order(9)
     @Test
     public void shouldUpdateTheCommonUser() throws Exception {
         updatedUser.setId(1);
@@ -146,6 +134,4 @@ class UserControllerTests {
         String content = result.getResponse().getContentAsString();
         Assertions.assertEquals("User id: 1 updated", content);
     }
-
-
 }

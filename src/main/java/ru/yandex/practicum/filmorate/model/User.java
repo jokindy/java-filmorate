@@ -1,20 +1,22 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
+import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
-@Builder
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 @Data
-public class User extends AbstractModel {
+public class User {
 
     @NotNull(message = "Email cannot be null")
-    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}", message = "Field must be in E-mail format")
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}", message = "Wrong e-mail format")
     @NotEmpty(message = "Email cannot be empty")
     private String email;
 
@@ -27,6 +29,13 @@ public class User extends AbstractModel {
     @NotNull
     private LocalDate birthday;
 
+    private Set<Integer> friendId;
+
+    private Set<Integer> likedFilmsId;
+
+    @EqualsAndHashCode.Exclude
+    private int id;
+
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
@@ -36,10 +45,39 @@ public class User extends AbstractModel {
             this.name = name;
         }
         this.birthday = birthday;
+        this.friendId = new HashSet<>();
+        this.likedFilmsId = new HashSet<>();
         validate();
     }
 
-    @Override
+    public void addUserToFriend(int id) {
+        if (friendId.contains(id)) {
+            throw new ModelAlreadyExistException("Users are already friends");
+        }
+        friendId.add(id);
+    }
+
+    public void deleteUserFromFriend(int id) {
+        if (!friendId.contains(id)) {
+            throw new ModelNotFoundException("Nothing to delete");
+        }
+        friendId.remove(id);
+    }
+
+    public void addLike(int filmId) {
+        if (likedFilmsId.contains(id)) {
+            throw new ModelAlreadyExistException("Film already liked by user");
+        }
+        likedFilmsId.add(filmId);
+    }
+
+    public void deleteLike(int filmId) {
+        if (!likedFilmsId.contains(id)) {
+            throw new ModelNotFoundException("Nothing to delete");
+        }
+        likedFilmsId.remove(filmId);
+    }
+
     public void validate() {
         if (login != null && login.contains(" ")) {
             throw new ValidationException("Login can't contains spaces");
