@@ -18,26 +18,24 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public String add(User user) {
+    public void add(User user) {
         if (map.containsValue(user)) {
             throw new ModelAlreadyExistException("This user is already added");
         }
         id++;
         user.setId(id);
         map.put(id, user);
-        return "User id: " + id + " added.";
     }
 
     @Override
-    public String put(User user) {
+    public void put(User user) {
         int userId = user.getId();
         if (map.containsKey(userId) && map.containsValue(user)) {
             throw new ModelAlreadyExistException("User id: " + userId + " is the same");
         } else if (map.containsKey(userId)) {
             map.replace(userId, user);
-            return "User id: " + userId + " updated";
         } else {
-            return add(user);
+            add(user);
         }
     }
 
@@ -53,7 +51,7 @@ public class InMemoryUserStorage implements UserStorage {
     public void deleteUserById(int id) {
         if (map.containsKey(id)) {
             User user = getUserById(id);
-            Set<Integer> userFriendId = new HashSet<>(user.getFriendId());
+            Set<Integer> userFriendId = new HashSet<>(user.getFriendsId());
             for (Integer friendId : userFriendId) {
                 deleteFriends(id, friendId);
             }

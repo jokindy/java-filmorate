@@ -29,7 +29,7 @@ public class User {
     @NotNull
     private LocalDate birthday;
 
-    private Set<Integer> friendId;
+    private Set<Integer> friendsId;
 
     private Set<Integer> likedFilmsId;
 
@@ -45,34 +45,34 @@ public class User {
             this.name = name;
         }
         this.birthday = birthday;
-        this.friendId = new HashSet<>();
+        this.friendsId = new HashSet<>();
         this.likedFilmsId = new HashSet<>();
         validate();
     }
 
-    public void addUserToFriend(int id) {
-        if (friendId.contains(id)) {
+    public void addUserToFriend(int friendId) {
+        if (friendsId.contains(friendId)) {
             throw new ModelAlreadyExistException("Users are already friends");
         }
-        friendId.add(id);
+        friendsId.add(friendId);
     }
 
-    public void deleteUserFromFriend(int id) {
-        if (!friendId.contains(id)) {
+    public void deleteUserFromFriend(int friendId) {
+        if (!friendsId.contains(friendId)) {
             throw new ModelNotFoundException("Nothing to delete");
         }
-        friendId.remove(id);
+        friendsId.remove(friendId);
     }
 
     public void addLike(int filmId) {
-        if (likedFilmsId.contains(id)) {
+        if (likedFilmsId.contains(filmId)) {
             throw new ModelAlreadyExistException("Film already liked by user");
         }
         likedFilmsId.add(filmId);
     }
 
     public void deleteLike(int filmId) {
-        if (!likedFilmsId.contains(id)) {
+        if (!likedFilmsId.contains(filmId)) {
             throw new ModelNotFoundException("Nothing to delete");
         }
         likedFilmsId.remove(filmId);

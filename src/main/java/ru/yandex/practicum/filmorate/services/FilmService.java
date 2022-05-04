@@ -23,12 +23,12 @@ public class FilmService {
         return storage.getFilms();
     }
 
-    public String addFilm(Film film) {
-        return storage.add(film);
+    public void addFilm(Film film) {
+        storage.add(film);
     }
 
-    public String putFilm(Film film) {
-        return storage.put(film);
+    public void putFilm(Film film) {
+        storage.put(film);
     }
 
     public Film getFilm(int id) {

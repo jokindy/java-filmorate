@@ -28,12 +28,12 @@ public class UserService {
         return storage.getUsers();
     }
 
-    public String addUser(User user) {
-        return storage.add(user);
+    public void addUser(User user) {
+        storage.add(user);
     }
 
-    public String putUser(User user) {
-        return storage.put(user);
+    public void putUser(User user) {
+         storage.put(user);
     }
 
     public User getUser(int id) {
@@ -66,7 +66,7 @@ public class UserService {
         if (!storage.isContains(id)) {
             throw new ModelNotFoundException(String.format("User id: %s not found", id));
         }
-        Set<Integer> userFriends = storage.getUserById(id).getFriendId();
+        Set<Integer> userFriends = storage.getUserById(id).getFriendsId();
         if (userFriends.isEmpty()) {
             throw new NoFriendsException("User hasn't friends :(");
         }
@@ -77,8 +77,8 @@ public class UserService {
 
     public Collection<User> getCommonFriends(int id1, int id2) {
         checkIds(id1, id2);
-        Set<Integer> ids1 = new HashSet<>(storage.getUserById(id1).getFriendId());
-        Set<Integer> ids2 = storage.getUserById(id2).getFriendId();
+        Set<Integer> ids1 = new HashSet<>(storage.getUserById(id1).getFriendsId());
+        Set<Integer> ids2 = storage.getUserById(id2).getFriendsId();
         ids1.retainAll(ids2);
         if (ids1.isEmpty()) {
             throw new NoFriendsException("No common friends");

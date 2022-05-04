@@ -28,19 +28,21 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public String add(@Valid @RequestBody User user) {
+    public User add(@Valid @RequestBody User user) {
         log.info("Add user");
-        return userService.addUser(user);
+        userService.addUser(user);
+        return user;
     }
 
     @PutMapping("/users")
-    public String update(@Valid @RequestBody User user) {
+    public User update(@Valid @RequestBody User user) {
         log.info("Put user");
-        return userService.putUser(user);
+        userService.putUser(user);
+        return user;
     }
 
     @GetMapping("/users/{userId}")
-    public User getUser(@PathVariable @Positive(message = "User id must be positive") int userId) {
+    public User getUser(@PathVariable int userId) {
         log.info("Get user by id: {}", userId);
         return userService.getUser(userId);
     }
@@ -52,8 +54,8 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}/friends/{friendId}")
-    public String addUserToFriends(@PathVariable @Positive(message = "User id must be positive") int userId,
-                                   @PathVariable @Positive(message = "Friend id must be positive") int friendId) {
+    public String addUserToFriends(@PathVariable int userId,
+                                   @PathVariable int friendId) {
         log.info(String.format("Add friend id: %s to user id: %s", friendId, userId));
         return userService.addToFriends(userId, friendId);
     }

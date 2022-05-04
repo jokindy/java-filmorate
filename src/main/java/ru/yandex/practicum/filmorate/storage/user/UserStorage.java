@@ -6,9 +6,9 @@ import java.util.Collection;
 
 public interface UserStorage {
 
-    String add(User user);
+    void add(User user);
 
-    String put(User user);
+    void put(User user);
 
     User getUserById(int id);
 

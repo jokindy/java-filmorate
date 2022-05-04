@@ -29,6 +29,4 @@ public class TestFilms {
 
     public static final Film filmWithNegativeDuration = new Film("Tenet", "Nolan broke the Universe",
             LocalDate.of(2020, 6, 12), -100);
-
-
 }

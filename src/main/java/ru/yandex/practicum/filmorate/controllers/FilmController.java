@@ -28,39 +28,39 @@ public class FilmController {
     }
 
     @PostMapping("/films")
-    public String add(@Valid @RequestBody Film film) {
+    public Film add(@Valid @RequestBody Film film) {
         log.info("Add film");
-        return filmService.addFilm(film);
+        filmService.addFilm(film);
+        return film;
     }
 
     @PutMapping("/films")
-    public String update(@Valid @RequestBody Film film) {
+    public Film update(@Valid @RequestBody Film film) {
         log.info("Put film");
-        return filmService.putFilm(film);
+        filmService.putFilm(film);
+        return film;
     }
 
     @GetMapping("/films/{filmId}")
-    public Film getFilm(@PathVariable @Positive(message = "Film id must be positive") int filmId) {
+    public Film getFilm(@PathVariable int filmId) {
         log.info("Get user by id: {}", filmId);
         return filmService.getFilm(filmId);
     }
 
     @DeleteMapping("/films/{filmId}")
-    public String deleteFilm(@PathVariable @Positive(message = "Film id must be positive") int filmId) {
+    public String deleteFilm(@PathVariable int filmId) {
         log.info("Delete film by id: {}", filmId);
         return filmService.deleteFilm(filmId);
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public String putLikeToFilm(@PathVariable @Positive(message = "Film id must be positive") int filmId,
-                                @PathVariable @Positive(message = "User id must be positive") int userId) {
+    public String putLikeToFilm(@PathVariable  int filmId, @PathVariable  int userId) {
         log.info(String.format("Put like to film id: %s from user id: %s", filmId, userId));
         return filmService.putLike(filmId, userId);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
-    public String deleteLike(@PathVariable @Positive(message = "Film id must be positive") int filmId,
-                             @PathVariable @Positive(message = "User id must be positive") int userId) {
+    public String deleteLike(@PathVariable  int filmId, @PathVariable int userId) {
         log.info(String.format("Delete film id: %s's like from from user id: %s", filmId, userId));
         return filmService.deleteLike(filmId, userId);
     }

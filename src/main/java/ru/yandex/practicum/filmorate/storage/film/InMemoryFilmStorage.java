@@ -19,26 +19,24 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public String add(Film film) {
+    public void add(Film film) {
         if (map.containsValue(film)) {
             throw new ModelAlreadyExistException("This film is already added");
         }
         id++;
         film.setId(id);
         map.put(id, film);
-        return "Film id: " + id + " added.";
     }
 
     @Override
-    public String put(Film film) {
+    public void put(Film film) {
         int filmId = film.getId();
         if (map.containsKey(filmId) && map.containsValue(film)) {
             throw new ModelAlreadyExistException("Film id: " + filmId + " is the same");
         } else if (map.containsKey(filmId)) {
             map.replace(filmId, film);
-            return "Film id: " + filmId + " updated";
         } else {
-            return add(film);
+            add(film);
         }
     }
 
@@ -77,8 +75,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilms(int count) {
         return getFilms().stream()
-                .limit(count)
                 .sorted(Comparator.comparingInt(Film::getUserLikesCount).reversed())
+                .limit(count)
                 .collect(Collectors.toList());
     }
 
