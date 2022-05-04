@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -16,25 +15,16 @@ import java.util.Collection;
 @Validated
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/users")
     public Collection<User> findAll() {
         log.info("Get users");
         return userService.getUsers();
-    }
-
-    @GetMapping("/users/{userId}")
-    public User getUser(@PathVariable @Positive(message = "User id must be positive") int userId) {
-        log.info("Get user by id: " + userId);
-        return userService.getUser(userId);
-    }
-
-    @DeleteMapping("/users/{userId}")
-    public String deleteUser(@PathVariable @Positive(message = "User id must be positive") int userId) {
-        log.info("Delete user by id: " + userId);
-        return userService.deleteUser(userId);
     }
 
     @PostMapping("/users")
@@ -47,6 +37,18 @@ public class UserController {
     public String update(@Valid @RequestBody User user) {
         log.info("Put user");
         return userService.putUser(user);
+    }
+
+    @GetMapping("/users/{userId}")
+    public User getUser(@PathVariable @Positive(message = "User id must be positive") int userId) {
+        log.info("Get user by id: {}", userId);
+        return userService.getUser(userId);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public String deleteUser(@PathVariable @Positive(message = "User id must be positive") int userId) {
+        log.info("Delete user by id: {}", userId);
+        return userService.deleteUser(userId);
     }
 
     @PutMapping("/users/{userId}/friends/{friendId}")
@@ -65,14 +67,13 @@ public class UserController {
 
     @GetMapping("/users/{userId}/friends")
     public Collection<User> getUserFriends(@PathVariable @Positive(message = "User id must be positive") int userId) {
-        log.info("Get user friends by id: " + userId);
+        log.info("Get user friends by id: {}", userId);
         return userService.getUserFriends(userId);
     }
 
     @GetMapping("/users/{userId}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable @Positive(message = "User id must be positive") int userId,
-                                             @PathVariable @Positive(message = "User id must be positive") int otherId)
-    {
+                                             @PathVariable @Positive(message = "User id must be positive") int otherId) {
         log.info(String.format("Get common friends between users id: %s and id: %s", userId, otherId));
         return userService.getCommonFriends(userId, otherId);
     }

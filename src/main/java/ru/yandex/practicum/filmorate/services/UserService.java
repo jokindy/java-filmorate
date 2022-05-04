@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NoFriendsException;
 import ru.yandex.practicum.filmorate.exceptions.SameIdException;
@@ -17,11 +16,13 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    @Autowired
-    private InMemoryUserStorage storage;
+    private final InMemoryUserStorage storage;
+    private final InMemoryFilmStorage filmStorage;
 
-    @Autowired
-    private InMemoryFilmStorage filmStorage;
+    public UserService(InMemoryUserStorage storage, InMemoryFilmStorage filmStorage) {
+        this.storage = storage;
+        this.filmStorage = filmStorage;
+    }
 
     public Collection<User> getUsers() {
         return storage.getUsers();
@@ -70,7 +71,7 @@ public class UserService {
             throw new NoFriendsException("User hasn't friends :(");
         }
         return userFriends.stream()
-                .map(item -> storage.getUserById(item))
+                .map(storage::getUserById)
                 .collect(Collectors.toList());
     }
 
@@ -83,7 +84,7 @@ public class UserService {
             throw new NoFriendsException("No common friends");
         }
         return ids1.stream()
-                .map(item -> storage.getUserById(item))
+                .map(storage::getUserById)
                 .collect(Collectors.toList());
     }
 

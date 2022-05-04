@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
@@ -47,8 +48,10 @@ public class Film {
         validate();
     }
 
-    public void validate() {
-        if (releaseDate.isBefore(CINEMA_BIRTHDAY)) throw new ValidationException("Film can't be SO OLD!");
+    private void validate() {
+        if (releaseDate.isBefore(CINEMA_BIRTHDAY)) {
+            throw new ValidationException("Film can't be SO OLD!");
+        }
     }
 
     public void putUserLike(int userId) {
@@ -58,6 +61,7 @@ public class Film {
         userLikes.add(userId);
     }
 
+    @JsonIgnore
     public int getUserLikesCount() {
         return userLikes.size();
     }

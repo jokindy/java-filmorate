@@ -117,7 +117,7 @@ class FilmControllerTests {
     @Order(8)
     @Test
     public void shouldPutTheCommonFilmTwice() throws Exception {
-         mockMvc.perform(
+        mockMvc.perform(
                         put("/films")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(film))

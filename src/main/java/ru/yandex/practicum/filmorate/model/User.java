@@ -78,7 +78,7 @@ public class User {
         likedFilmsId.remove(filmId);
     }
 
-    public void validate() {
+    private void validate() {
         if (login != null && login.contains(" ")) {
             throw new ValidationException("Login can't contains spaces");
         }

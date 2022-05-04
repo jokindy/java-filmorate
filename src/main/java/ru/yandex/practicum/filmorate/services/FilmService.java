@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,11 +11,13 @@ import java.util.*;
 @Service
 public class FilmService {
 
-    @Autowired
-    private InMemoryFilmStorage storage;
+    private final InMemoryFilmStorage storage;
+    private final InMemoryUserStorage userStorage;
 
-    @Autowired
-    private InMemoryUserStorage userStorage;
+    public FilmService(InMemoryFilmStorage storage, InMemoryUserStorage userStorage) {
+        this.storage = storage;
+        this.userStorage = userStorage;
+    }
 
     public Collection<Film> getFilms() {
         return storage.getFilms();

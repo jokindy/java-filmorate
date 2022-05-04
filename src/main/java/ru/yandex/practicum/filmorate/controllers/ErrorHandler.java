@@ -80,7 +80,6 @@ public class ErrorHandler {
         return error;
     }
 
-
     static class ErrorResponse {
         private final String error;
 
