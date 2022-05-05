@@ -45,32 +45,32 @@ class FilmControllerTests {
     @Order(2)
     @Test
     public void shouldPostTheCommonFilmTwice() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         post("/films")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(film))
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("This film is already added", content);
+                .andExpect(status().isConflict());
+    }
+
+    @Order(3)
+    @Test
+    public void shouldPostTheOldFilm() throws Exception {
+        String oldMovieJSON = "{\n" +
+                "    \"name\":\"Gentleman\",\n" +
+                "    \"description\":\"Man with honor\",\n" +
+                "    \"releaseDate\":\"1874-10-03\",\n" +
+                "    \"duration\":115\n" +
+                "}";
+        mockMvc.perform(
+                        post("/films")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(oldMovieJSON)
+                )
+                .andExpect(status().isBadRequest());
     }
 
     @Order(4)
-    @Test
-    public void shouldPostTheOldFilm() throws Exception {
-        MvcResult result = mockMvc.perform(
-                        post("/films")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(oldFilm))
-                )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("Something wrong. Check the data.", content);
-    }
-
-    @Order(5)
     @Test
     public void shouldPostTheFilmWithEmptyTitle() throws Exception {
         mockMvc.perform(
@@ -81,7 +81,7 @@ class FilmControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Order(6)
+    @Order(5)
     @Test
     public void shouldPostTheFilmWith200CharDescription() throws Exception {
         mockMvc.perform(
@@ -92,7 +92,7 @@ class FilmControllerTests {
                 .andExpect(status().isOk());
     }
 
-    @Order(7)
+    @Order(6)
     @Test
     public void shouldPostTheFilmWith201CharDescription() throws Exception {
         mockMvc.perform(
@@ -103,7 +103,7 @@ class FilmControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Order(8)
+    @Order(7)
     @Test
     public void shouldPostTheFilmWitNegativeDuration() throws Exception {
         mockMvc.perform(
@@ -114,18 +114,15 @@ class FilmControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Order(9)
+    @Order(8)
     @Test
     public void shouldPutTheCommonFilmTwice() throws Exception {
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         put("/films")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(film))
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("This film is already added", content);
+                .andExpect(status().isConflict());
     }
 
     @Order(9)
@@ -142,6 +139,4 @@ class FilmControllerTests {
         String content = result.getResponse().getContentAsString();
         Assertions.assertEquals("Film id: 1 updated", content);
     }
-
-
 }
