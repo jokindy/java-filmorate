@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import org.springframework.test.web.servlet.MvcResult;
 import ru.yandex.practicum.filmorate.controllers.FilmController;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -56,12 +55,6 @@ class FilmControllerTests {
     @Order(3)
     @Test
     public void shouldPostTheOldFilm() throws Exception {
-        String oldMovieJSON = "{\n" +
-                "    \"name\":\"Gentleman\",\n" +
-                "    \"description\":\"Man with honor\",\n" +
-                "    \"releaseDate\":\"1874-10-03\",\n" +
-                "    \"duration\":115\n" +
-                "}";
         mockMvc.perform(
                         post("/films")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -128,15 +121,11 @@ class FilmControllerTests {
     @Order(9)
     @Test
     public void shouldUpdateTheCommonFilm() throws Exception {
-        updatedFilm.setId(1);
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         put("/films")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(updatedFilm))
                 )
-                .andExpect(status().isOk())
-                .andReturn();
-        String content = result.getResponse().getContentAsString();
-        Assertions.assertEquals("Film id: 1 updated", content);
+                .andExpect(status().isOk());
     }
 }
