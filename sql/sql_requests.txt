@@ -1,0 +1,48 @@
+Примеры SQL-запросов (протестировано в MySQL Workbench):
+
+Поиск фильмов по жанру:
+
+SELECT f.title
+FROM films AS f
+LEFT JOIN film_genres AS fg ON f.film_id = fg.film_id
+LEFT JOIN genres AS g ON fg.genre_id = g.genre_id
+WHERE g.name = 'Detective';
+
+Поиск фильмов, выпущенных после определенной даты:
+
+SELECT title, release_date
+FROM film
+WHERE release_date >= '1996-01-01'
+ORDER BY release_date;
+
+Вывод самых популярных фильмов:
+
+SELECT f.title,
+COUNT(ul.user_id) as popularity
+FROM films AS f
+LEFT JOIN user_likes AS ul ON f.film_id = ul.film_id
+GROUP BY f.title
+ORDER BY popularity DESC;
+
+Вывод друзей пользователя по ID:
+
+SELECT 
+u2.user_id as friend_id,
+u2.name as friend_name
+FROM users AS u1
+LEFT JOIN friends AS f ON u1.user_id = f.user1_id
+LEFT JOIN users AS u2 ON f.user2_id = u2.user_id
+WHERE u1.user_id = 1 and f.status = 'friends';
+
+Вывод общих друзей между двумя пользователями:
+
+SELECT DISTINCT
+user2_id
+FROM (SELECT 
+	user2_id
+	FROM friends
+	WHERE (user1_id = 4 and status = 'friends')) AS u1
+INNER JOIN (SELECT 
+	user2_id
+	FROM friends
+	WHERE (user1_id = 3 and status = 'friends')) AS u2 USING(user2_id);
