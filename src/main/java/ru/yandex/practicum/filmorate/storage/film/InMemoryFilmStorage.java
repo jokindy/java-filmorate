@@ -36,7 +36,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else if (map.containsKey(filmId)) {
             map.replace(filmId, film);
         } else {
-            add(film);
+            throw new ModelNotFoundException("Film id: " + filmId + " not found");
         }
     }
 

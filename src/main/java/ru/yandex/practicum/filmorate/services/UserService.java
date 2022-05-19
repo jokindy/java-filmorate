@@ -80,9 +80,6 @@ public class UserService {
         Set<Integer> ids1 = new HashSet<>(storage.getUserById(id1).getFriendsId());
         Set<Integer> ids2 = storage.getUserById(id2).getFriendsId();
         ids1.retainAll(ids2);
-        if (ids1.isEmpty()) {
-            throw new NoFriendsException("No common friends");
-        }
         return ids1.stream()
                 .map(storage::getUserById)
                 .collect(Collectors.toList());

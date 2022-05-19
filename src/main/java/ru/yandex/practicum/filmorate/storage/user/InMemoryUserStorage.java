@@ -35,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
         } else if (map.containsKey(userId)) {
             map.replace(userId, user);
         } else {
-            add(user);
+            throw new ModelNotFoundException("User id: " + userId + " not found");
         }
     }
 
