@@ -26,13 +26,11 @@ ORDER BY popularity DESC;
 
 Вывод друзей пользователя по ID:
 
-SELECT 
-u2.user_id as friend_id,
-u2.name as friend_name
-FROM users AS u1
-LEFT JOIN friends AS f ON u1.user_id = f.user1_id
-LEFT JOIN users AS u2 ON f.user2_id = u2.user_id
-WHERE u1.user_id = 1 and f.status = 'friends';
+SELECT user2_id AS friend_id,
+u.name AS friend_name
+FROM friends AS f
+LEFT JOIN users AS u ON f.user2_id = u.user_id
+WHERE user1_id = 1 AND status = true;
 
 Вывод общих друзей между двумя пользователями:
 
@@ -41,8 +39,8 @@ user2_id
 FROM (SELECT 
 	user2_id
 	FROM friends
-	WHERE (user1_id = 4 and status = 'friends')) AS u1
+	WHERE (user1_id = 4 and status = true)) AS u1
 INNER JOIN (SELECT 
 	user2_id
 	FROM friends
-	WHERE (user1_id = 3 and status = 'friends')) AS u2 USING(user2_id);
+	WHERE (user1_id = 3 and status = true)) AS u2 USING(user2_id);
