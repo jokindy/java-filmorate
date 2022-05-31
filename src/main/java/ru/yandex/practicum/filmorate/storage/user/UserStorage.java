@@ -14,12 +14,17 @@ public interface UserStorage {
 
     void deleteUserById(int id);
 
-    void addFriends(int id, int friendId);
+    Collection<User> getUserFriends(int id);
+
+    void putFriendInvitation(int id, int friendId);
+
+    void confirmFriendship(int id, int friendId);
 
     void deleteFriends(int id, int friendId);
+
+    Collection<User> getCommonFriends(int id1, int id2);
 
     Collection<User> getUsers();
 
     boolean isContains(int id);
-
 }

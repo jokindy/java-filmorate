@@ -1,20 +1,22 @@
 package ru.yandex.practicum.filmorate.services;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
 @Service
 public class FilmService {
 
-    private final InMemoryFilmStorage storage;
-    private final InMemoryUserStorage userStorage;
+    private final FilmStorage storage;
+    private final UserStorage userStorage;
 
-    public FilmService(InMemoryFilmStorage storage, InMemoryUserStorage userStorage) {
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage storage,
+                       @Qualifier("UserDbStorage") UserStorage userStorage) {
         this.storage = storage;
         this.userStorage = userStorage;
     }
@@ -48,14 +50,12 @@ public class FilmService {
     public String putLike(int filmId, int userId) {
         checkIds(filmId, userId);
         storage.putLike(filmId, userId);
-        userStorage.getUserById(userId).addLike(filmId);
         return String.format("User id: %s put like to film id: %s", userId, filmId);
     }
 
     public String deleteLike(int filmId, int userId) {
         checkIds(filmId, userId);
         storage.deleteLike(filmId, userId);
-        userStorage.getUserById(userId).deleteLike(filmId);
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 

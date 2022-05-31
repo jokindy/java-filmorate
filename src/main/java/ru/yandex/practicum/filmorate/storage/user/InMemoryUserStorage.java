@@ -3,18 +3,23 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.NoFriendsException;
+import ru.yandex.practicum.filmorate.model.Friendship;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> map;
+    private final List<Friendship> friendsList;
     private int id = 0;
 
     public InMemoryUserStorage() {
         this.map = new HashMap<>();
+        friendsList = new ArrayList<>();
     }
 
     @Override
@@ -62,15 +67,67 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriends(int id, int friendId) {
-        getUserById(id).addUserToFriend(friendId);
-        getUserById(friendId).addUserToFriend(id);
+    public Collection<User> getUserFriends(int id) {
+        if (!map.containsKey(id)) {
+            throw new ModelNotFoundException(String.format("User id: %s not found", id));
+        }
+        Set<Integer> userFriends = map.get(id).getFriendsId();
+        if (userFriends.isEmpty()) {
+            throw new NoFriendsException("User hasn't friends :(");
+        }
+        return userFriends.stream()
+                .map(map::get)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void putFriendInvitation(int id, int friendId) {
+        Friendship friendship = new Friendship(id, friendId);
+        if (!friendsList.contains(friendship)) {
+            friendsList.add(friendship);
+        } else {
+            throw new ModelAlreadyExistException(String.format("User id: %s already have invitation" +
+                    " or friendship from user id: %s", friendId, id));
+        }
+    }
+
+    @Override
+    public void confirmFriendship(int id, int friendId) {
+        Friendship friendship = new Friendship(id, friendId);
+        if (friendsList.contains(friendship)) {
+            int index = friendsList.indexOf(friendship);
+            friendship.setStatus(true);
+            friendsList.set(index, friendship);
+            getUserById(id).addUserToFriend(friendId);
+            getUserById(friendId).addUserToFriend(id);
+        } else {
+            throw new NoFriendsException(String.format("User id: %s don't have invitation" +
+                    " or friendship with user id: %s", friendId, id));
+        }
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(int id1, int id2) {
+        Set<Integer> ids1 = new HashSet<>(getUserById(id1).getFriendsId());
+        Set<Integer> ids2 = getUserById(id2).getFriendsId();
+        ids1.retainAll(ids2);
+        return ids1.stream()
+                .map(map::get)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteFriends(int id, int friendId) {
-        getUserById(id).deleteUserFromFriend(friendId);
-        getUserById(friendId).deleteUserFromFriend(id);
+        Friendship friendship = new Friendship(id, friendId);
+        friendship.setStatus(true);
+        if (friendsList.contains(friendship)) {
+            friendsList.remove(friendship);
+            getUserById(id).deleteUserFromFriend(friendId);
+            getUserById(friendId).deleteUserFromFriend(id);
+        } else {
+            throw new NoFriendsException(String.format("User id: %s don't have invitation" +
+                    " or friendship with user id: %s", friendId, id));
+        }
     }
 
     @Override

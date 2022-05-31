@@ -1,25 +1,26 @@
 package ru.yandex.practicum.filmorate.services;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NoFriendsException;
 import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    private final InMemoryUserStorage storage;
-    private final InMemoryFilmStorage filmStorage;
+    private final UserStorage storage;
+    private final FilmStorage filmStorage;
 
-    public UserService(InMemoryUserStorage storage, InMemoryFilmStorage filmStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage storage,
+                       @Qualifier("InMemoryFilmStorage") FilmStorage filmStorage) {
         this.storage = storage;
         this.filmStorage = filmStorage;
     }
@@ -33,7 +34,7 @@ public class UserService {
     }
 
     public void putUser(User user) {
-         storage.put(user);
+        storage.put(user);
     }
 
     public User getUser(int id) {
@@ -52,8 +53,14 @@ public class UserService {
 
     public String addToFriends(int userId, int friendId) {
         checkIds(userId, friendId);
-        storage.addFriends(userId, friendId);
-        return String.format("User id: %s added as friend to user id: %s", friendId, userId);
+        storage.putFriendInvitation(userId, friendId);
+        return String.format("User id: %s send invitation of friendship to user id: %s", userId, friendId);
+    }
+
+    public String confirmFriendship(int userId, int friendId) {
+        checkIds(userId, friendId);
+        storage.confirmFriendship(userId, friendId);
+        return String.format("User id: %s added user id: %s to friends", friendId, userId);
     }
 
     public String deleteFromFriends(int userId, int friendId) {
@@ -63,26 +70,12 @@ public class UserService {
     }
 
     public Collection<User> getUserFriends(int id) {
-        if (!storage.isContains(id)) {
-            throw new ModelNotFoundException(String.format("User id: %s not found", id));
-        }
-        Set<Integer> userFriends = storage.getUserById(id).getFriendsId();
-        if (userFriends.isEmpty()) {
-            throw new NoFriendsException("User hasn't friends :(");
-        }
-        return userFriends.stream()
-                .map(storage::getUserById)
-                .collect(Collectors.toList());
+        return storage.getUserFriends(id);
     }
 
     public Collection<User> getCommonFriends(int id1, int id2) {
         checkIds(id1, id2);
-        Set<Integer> ids1 = new HashSet<>(storage.getUserById(id1).getFriendsId());
-        Set<Integer> ids2 = storage.getUserById(id2).getFriendsId();
-        ids1.retainAll(ids2);
-        return ids1.stream()
-                .map(storage::getUserById)
-                .collect(Collectors.toList());
+        return storage.getCommonFriends(id1, id2);
     }
 
     private void checkIds(int userId, int friendId) {

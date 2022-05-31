@@ -9,7 +9,9 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @EqualsAndHashCode
@@ -17,6 +19,9 @@ import java.util.Set;
 public class Film {
 
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+
+    @EqualsAndHashCode.Exclude
+    private int id;
 
     @NotNull
     @NotBlank(message = "Name may not be blank")
@@ -30,20 +35,26 @@ public class Film {
     @NotNull
     private LocalDate releaseDate;
 
-    @EqualsAndHashCode.Exclude
-    private int id;
-
     @NotNull
     @Positive(message = "Duration must be positive")
     private int duration;
 
+    private int rate;
+
+    @JsonIgnore
     private Set<Integer> userLikes;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
+    @NotNull
+    @EqualsAndHashCode.Exclude
+    private Map<String, Integer> mpa;
+
+    public Film(String name, String description, LocalDate releaseDate, int duration, int rate) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rate = rate;
+        this.mpa = new HashMap<>();
         this.userLikes = new HashSet<>();
         validate();
     }
@@ -66,10 +77,25 @@ public class Film {
         return userLikes.size();
     }
 
+    public void setMpaId(Integer mpaId) {
+        this.mpa.put("id", mpaId);
+    }
+
     public void deleteUserLike(int userId) {
         if (!userLikes.contains(userId)) {
             throw new ModelNotFoundException("Nothing to delete");
         }
         userLikes.remove(userId);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("description", description);
+        map.put("release_date", releaseDate);
+        map.put("duration", duration);
+        map.put("rate", rate);
+        map.put("mpa", mpa.get("id"));
+        return map;
     }
 }

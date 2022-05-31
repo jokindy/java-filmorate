@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+@Component("InMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> map;

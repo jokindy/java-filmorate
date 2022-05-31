@@ -6,28 +6,12 @@ import java.time.LocalDate;
 
 public class TestFilms {
 
-    public static final Film film = new Film("Batman", "Man without fear",
-            LocalDate.of(2005, 10, 3), 135);
-    public static final Film updatedFilm = new Film("Catman", "Man without fear",
-            LocalDate.of(2005, 10, 3), 135);
-    public static final Film filmWithEmptyTitle = new Film(null, "Man with honor",
-            LocalDate.of(2000, 4, 15), 120);
-    public static final Film filmWith200CharDescription = new Film("200 characters",
-            "MA9nznts0o0rqr0rTtGBj4EXEKtCkJt7Q30dbrWmoYM0nWoBKbJz7" +
-                    "uvj031F7Kpa8Y6NXz9Y8qepYhCXuad7m69bpPG05NhPzRMBU8dlsZe9oL5vWApd" +
-                    "jkROCxCpi32yMG8Kol6gLjNcQe7RecP4FBwM434pUCzxlNQwmuLEYhBXTjF8UVHuG84eEQduBSLal6WprRhE",
-            LocalDate.of(1988, 6, 12), 110);
-    public static final Film filmWith201CharDescription = new Film("200 characters",
-            "MA9nznts0o0rqr0rTtGBj4EXEKtCkJt7Q3p0dbrWmoYM0nWoBKbJz7" +
-                    "uvj031F7Kpa8Y6NXz9Y8qepYhCXuad7m69bpPG05NhPzRMBU8dlsZe9oL5vWApd" +
-                    "jkROCxCpi32yMG8Kol6gLjNcQe7RecP4FBwM434pUCzxlNQwmuLEYhBXTjF8UVHuG84eEQduBSLal6WprRhE",
-            LocalDate.of(1988, 6, 12), 110);
-    public static final Film filmWithNegativeDuration = new Film("Tenet", "Nolan broke the Universe",
-            LocalDate.of(2020, 6, 12), -100);
-    public static String oldMovieJSON = "{\n" +
-            "    \"name\":\"Gentleman\",\n" +
-            "    \"description\":\"Man with honor\",\n" +
-            "    \"releaseDate\":\"1874-10-03\",\n" +
-            "    \"duration\":115\n" +
-            "}";
+    public static final Film commonFilm1 = new Film("Batman", "Man without fear",
+            LocalDate.of(2022, 3, 11), 135, 3);
+    public static final Film updatedFilm1 = new Film("Batman-3", "Man without fear",
+            LocalDate.of(2022, 3, 11), 135, 3);
+    public static final Film commonFilm2 = new Film("Titanic", "Big ship goes to bottom",
+            LocalDate.of(1997, 9, 17), 180, 10);
+    public static final Film commonFilm3 = new Film("Brother", "EVIL RUSSIAN",
+            LocalDate.of(1998, 10, 15), 130, 7);
 }

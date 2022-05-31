@@ -29,14 +29,14 @@ public class UserController {
 
     @PostMapping("/users")
     public User add(@Valid @RequestBody User user) {
-        log.info("Add user");
+        log.info("Add new user");
         userService.addUser(user);
         return user;
     }
 
     @PutMapping("/users")
     public User update(@Valid @RequestBody User user) {
-        log.info("Put user");
+        log.info("Put user id: {}", user.getId());
         userService.putUser(user);
         return user;
     }
@@ -58,6 +58,13 @@ public class UserController {
                                    @PathVariable int friendId) {
         log.info(String.format("Add friend id: %s to user id: %s", friendId, userId));
         return userService.addToFriends(userId, friendId);
+    }
+
+    @PatchMapping("/users/{userId}/friends/{friendId}")
+    public String confirmFriendship(@PathVariable int userId,
+                                    @PathVariable int friendId) {
+        log.info(String.format("Confirm friendship between user id: %s and user id: %s", friendId, userId));
+        return userService.confirmFriendship(userId, friendId);
     }
 
     @DeleteMapping("/users/{userId}/friends/{friendId}")

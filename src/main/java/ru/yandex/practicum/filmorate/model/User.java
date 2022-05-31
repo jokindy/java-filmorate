@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
@@ -8,16 +9,21 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @EqualsAndHashCode
 @Data
 public class User {
 
+    @EqualsAndHashCode.Exclude
+    private Integer id;
+
     @NotNull(message = "Email cannot be null")
     @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}", message = "Wrong e-mail format")
-    @NotEmpty(message = "Email cannot be empty")
+    @NotBlank(message = "Email cannot be empty")
     private String email;
 
     @NotBlank(message = "Login cannot be blank")
@@ -29,12 +35,11 @@ public class User {
     @NotNull
     private LocalDate birthday;
 
+    @JsonIgnore
     private Set<Integer> friendsId;
 
+    @JsonIgnore
     private Set<Integer> likedFilmsId;
-
-    @EqualsAndHashCode.Exclude
-    private int id;
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
@@ -76,6 +81,15 @@ public class User {
             throw new ModelNotFoundException("Nothing to delete");
         }
         likedFilmsId.remove(filmId);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("email", email);
+        map.put("login", login);
+        map.put("name", name);
+        map.put("birthday", birthday);
+        return map;
     }
 
     private void validate() {
