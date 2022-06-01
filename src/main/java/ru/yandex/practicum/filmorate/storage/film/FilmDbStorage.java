@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -47,7 +48,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         jdbcTemplate.update("UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
                         "rate = ?, MPA = ? WHERE film_id = ?", film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().get("id"), filmId);
+                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), filmId);
     }
 
     @Override
@@ -117,10 +118,10 @@ public class FilmDbStorage implements FilmStorage {
         LocalDate releaseDate = userRows.getDate("release_date").toLocalDate();
         int duration = userRows.getInt("duration");
         int rate = userRows.getInt("rate");
-        Integer mpaId = userRows.getInt("mpa");
-        Film film = new Film(name, description, releaseDate, duration, rate);
+        int mpaId = userRows.getInt("mpa");
+        MPA mpa = new MPA(mpaId);
+        Film film = new Film(name, description, releaseDate, duration, rate, mpa);
         film.setId(id);
-        film.setMpaId(mpaId);
         return film;
     }
 }

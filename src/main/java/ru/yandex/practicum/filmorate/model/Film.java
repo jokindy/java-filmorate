@@ -46,15 +46,15 @@ public class Film {
 
     @NotNull
     @EqualsAndHashCode.Exclude
-    private Map<String, Integer> mpa;
+    private MPA mpa;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration, int rate) {
+    public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.rate = rate;
-        this.mpa = new HashMap<>();
+        this.mpa = mpa;
         this.userLikes = new HashSet<>();
         validate();
     }
@@ -77,10 +77,6 @@ public class Film {
         return userLikes.size();
     }
 
-    public void setMpaId(Integer mpaId) {
-        this.mpa.put("id", mpaId);
-    }
-
     public void deleteUserLike(int userId) {
         if (!userLikes.contains(userId)) {
             throw new ModelNotFoundException("Nothing to delete");
@@ -95,7 +91,7 @@ public class Film {
         map.put("release_date", releaseDate);
         map.put("duration", duration);
         map.put("rate", rate);
-        map.put("mpa", mpa.get("id"));
+        map.put("mpa", mpa.getId());
         return map;
     }
 }
