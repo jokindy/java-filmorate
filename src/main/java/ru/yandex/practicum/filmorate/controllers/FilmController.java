@@ -55,13 +55,13 @@ public class FilmController {
 
     @PutMapping("/films/{filmId}/like/{userId}")
     public String putLikeToFilm(@PathVariable  int filmId, @PathVariable  int userId) {
-        log.info(String.format("Put like to film id: %s from user id: %s", filmId, userId));
+        log.info("Put like to film id: {} from user id: {}", filmId, userId);
         return filmService.putLike(filmId, userId);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
     public String deleteLike(@PathVariable  int filmId, @PathVariable int userId) {
-        log.info(String.format("Delete film id: %s's like from from user id: %s", filmId, userId));
+        log.info("Delete film id: {}'s like from from user id: {}", filmId, userId);
         return filmService.deleteLike(filmId, userId);
     }
 

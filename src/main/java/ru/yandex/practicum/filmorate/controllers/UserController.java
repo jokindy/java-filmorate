@@ -63,14 +63,14 @@ public class UserController {
     @PatchMapping("/users/{userId}/friends/{friendId}")
     public String confirmFriendship(@PathVariable int userId,
                                     @PathVariable int friendId) {
-        log.info(String.format("Confirm friendship between user id: %s and user id: %s", friendId, userId));
+        log.info("Confirm friendship between user id: {} and user id: {}", friendId, userId);
         return userService.confirmFriendship(userId, friendId);
     }
 
     @DeleteMapping("/users/{userId}/friends/{friendId}")
     public String deleteUserFromFriends(@PathVariable @Positive(message = "User id must be positive") int userId,
                                         @PathVariable @Positive(message = "Friend id must be positive") int friendId) {
-        log.info(String.format("Delete friend id: %s  from user id: %s", friendId, userId));
+        log.info("Delete friend id: {}  from user id: {}", friendId, userId);
         return userService.deleteFromFriends(userId, friendId);
     }
 
@@ -82,8 +82,9 @@ public class UserController {
 
     @GetMapping("/users/{userId}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable @Positive(message = "User id must be positive") int userId,
-                                             @PathVariable @Positive(message = "User id must be positive") int otherId) {
-        log.info(String.format("Get common friends between users id: %s and id: %s", userId, otherId));
+                                             @PathVariable @Positive(message = "User id must be positive") int otherId)
+    {
+        log.info("Get common friends between users id: {} and id: {}", userId, otherId);
         return userService.getCommonFriends(userId, otherId);
     }
 }
