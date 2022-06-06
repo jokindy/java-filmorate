@@ -9,11 +9,17 @@ CREATE TABLE IF NOT EXISTS `Films`
     `MPA`          int
 );
 
-CREATE TABLE IF NOT EXISTS `Film_Genres`
+create table if not exists FILM_GENRES
 (
-    `film_id`  int,
-    `genre_id` int,
-    PRIMARY KEY (`film_id`, `genre_id`)
+    FILM_ID  INTEGER not null,
+    GENRE_ID INTEGER not null,
+    primary key (FILM_ID, GENRE_ID),
+    constraint FILM_GENRES_FILMS_FILM_ID_FK
+        foreign key (FILM_ID) references FILMS
+            on update cascade on delete cascade,
+    constraint FILM_GENRES_GENRES_GENRE_ID_FK
+        foreign key (GENRE_ID) references GENRES
+            on update cascade on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS `Genres`
@@ -24,8 +30,14 @@ CREATE TABLE IF NOT EXISTS `Genres`
 
 CREATE TABLE IF NOT EXISTS `User_Likes`
 (
-    `film_id` int,
-    `user_id` int
+    FILM_ID INTEGER,
+    USER_ID INTEGER,
+    constraint USER_LIKES_FILMS_FILM_ID_FK
+        foreign key (FILM_ID) references FILMS
+            on delete cascade,
+    constraint USER_LIKES_USERS_USER_ID_FK
+        foreign key (USER_ID) references USERS
+            on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS `Users`
@@ -39,26 +51,15 @@ CREATE TABLE IF NOT EXISTS `Users`
 
 CREATE TABLE IF NOT EXISTS `Friends`
 (
-    `user1_id` int,
-    `user2_id` int,
-    `status`   boolean,
-    PRIMARY KEY (`user1_id`, `user2_id`)
+    USER1_ID INTEGER not null,
+    USER2_ID INTEGER not null,
+    STATUS   BOOLEAN,
+    primary key (USER1_ID, USER2_ID),
+    constraint FRIENDS_USERS_USER_ID_FK
+        foreign key (USER1_ID) references USERS
+            on delete cascade,
+    constraint FRIENDS_USERS_USER_ID_FK_2
+        foreign key (USER2_ID) references USERS
+            on delete cascade
 );
 
-ALTER TABLE `User_Likes`
-    ADD FOREIGN KEY (`film_id`) REFERENCES `Films` (`film_id`);
-
-ALTER TABLE `User_Likes`
-    ADD FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`);
-
-ALTER TABLE `Film_Genres`
-    ADD FOREIGN KEY (`film_id`) REFERENCES `Films` (`film_id`);
-
-ALTER TABLE `Film_Genres`
-    ADD FOREIGN KEY (`genre_id`) REFERENCES `Genres` (`genre_id`);
-
-ALTER TABLE `Friends`
-    ADD FOREIGN KEY (`user1_id`) REFERENCES `Users` (`user_id`);
-
-ALTER TABLE `Friends`
-    ADD FOREIGN KEY (`user2_id`) REFERENCES `Users` (`user_id`);

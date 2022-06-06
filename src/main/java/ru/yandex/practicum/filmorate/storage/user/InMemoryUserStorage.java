@@ -118,8 +118,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteFriends(int id, int friendId) {
-        Friendship friendship = new Friendship(id, friendId);
-        friendship.setStatus(true);
+        Friendship friendship = new Friendship(id, friendId, true);
         if (friendsList.contains(friendship)) {
             friendsList.remove(friendship);
             getUserById(id).deleteUserFromFriend(friendId);

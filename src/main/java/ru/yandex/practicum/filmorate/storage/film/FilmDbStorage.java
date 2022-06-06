@@ -68,8 +68,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilmById(int id) {
         try {
-            jdbcTemplate.update("DELETE FROM user_likes WHERE film_id = ?", id);
-            jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", id);
             jdbcTemplate.update("DELETE FROM films WHERE film_id = ?", id);
         } catch (EmptyResultDataAccessException e) {
             throw new ModelNotFoundException(String.format("User id: %s not found", id));

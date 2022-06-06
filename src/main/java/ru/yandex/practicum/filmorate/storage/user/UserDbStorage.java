@@ -63,9 +63,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteUserById(int id) {
         try {
-            jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ?", id);
-            jdbcTemplate.update("DELETE FROM friends WHERE user2_id = ?", id);
-            jdbcTemplate.update("DELETE FROM user_likes WHERE user_id = ?", id);
             jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id);
         } catch (EmptyResultDataAccessException e) {
             throw new ModelNotFoundException(String.format("User id: %s not found", id));

@@ -7,14 +7,20 @@ import java.util.Objects;
 @Data
 public class Friendship {
 
-    private int idFrom;
-    private int idTo;
+    private final int idFrom;
+    private final int idTo;
     private boolean status;
 
     public Friendship(int idFrom, int idTo) {
         this.idFrom = idFrom;
         this.idTo = idTo;
         this.status = false;
+    }
+
+    public Friendship(int idFrom, int idTo, boolean status) {
+        this.idFrom = idFrom;
+        this.idTo = idTo;
+        this.status = status;
     }
 
     @Override
