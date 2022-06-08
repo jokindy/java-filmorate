@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.services.FilmService;
 
 import javax.validation.Valid;
@@ -71,4 +73,29 @@ public class FilmController {
         log.info("Get {} popular films", count);
         return filmService.getPopularFilms(count);
     }
+
+    @GetMapping("/mpa/{filmId}")
+    public MPA getMpaById(@PathVariable int filmId) {
+        log.info("Get MPA by id: {}", filmId);
+        return filmService.getMpaByFilmId(filmId);
+    }
+
+    @GetMapping("/mpa")
+    public Collection<MPA> getAllMpa() {
+        log.info("Get all MPA");
+        return filmService.getAllMpa();
+    }
+
+    @GetMapping("/genres/{filmId}")
+    public Genre getGenreById(@PathVariable int filmId) {
+        log.info("Get genre by id: {}", filmId);
+        return filmService.getGenreById(filmId);
+    }
+
+    @GetMapping("/genres")
+    public Collection<Genre> getAllGenres() {
+        log.info("Get all genres");
+        return filmService.getAllGenres();
+    }
+
 }

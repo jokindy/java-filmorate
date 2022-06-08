@@ -9,10 +9,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @EqualsAndHashCode
 @Data
@@ -45,8 +42,10 @@ public class Film {
     private Set<Integer> userLikes;
 
     @NotNull
-    @EqualsAndHashCode.Exclude
     private MPA mpa;
+
+    @EqualsAndHashCode.Exclude
+    private LinkedHashSet<Genre> genres;
 
     public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
         this.name = name;
@@ -91,7 +90,7 @@ public class Film {
         map.put("release_date", releaseDate);
         map.put("duration", duration);
         map.put("rate", rate);
-        map.put("mpa", mpa.getId());
+        map.put("mpa_id", mpa.getId());
         return map;
     }
 }

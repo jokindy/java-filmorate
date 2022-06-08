@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -62,6 +64,23 @@ public class FilmService {
     public Collection<Film> getPopularFilms(int count) {
         return storage.getPopularFilms(count);
     }
+
+    public MPA getMpaByFilmId(int filmId) {
+        return storage.getMpaById(filmId);
+    }
+
+    public Collection<MPA> getAllMpa() {
+        return storage.getAllMpa();
+    }
+
+    public Genre getGenreById(int filmId) {
+        return storage.getGenreById(filmId);
+    }
+
+    public Collection<Genre> getAllGenres() {
+        return storage.getAllGenres();
+    }
+
 
     private void checkIds(int filmId, int userId) {
         if (!storage.isContains(filmId)) {

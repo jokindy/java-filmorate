@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,11 +48,35 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<MPA> getAllMpa() {
+        //реализовано в БД
+        return null;
+    }
+
+    @Override
+    public Collection<Genre> getAllGenres() {
+        //реализовано в БД
+        return null;
+    }
+
+    @Override
     public Film getFilmById(int id) {
         return map.values().stream()
                 .filter(x -> x.getId() == id)
                 .findFirst()
                 .orElseThrow(() -> new ModelNotFoundException(String.format("Film id: %s not found", id)));
+    }
+
+    @Override
+    public MPA getMpaById(int id) {
+        //реализовано в БД
+        return null;
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        //реализовано в БД
+        return null;
     }
 
     @Override
