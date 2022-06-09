@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
@@ -38,9 +35,6 @@ public class Film {
 
     private int rate;
 
-    @JsonIgnore
-    private Set<Integer> userLikes;
-
     @NotNull
     private MPA mpa;
 
@@ -53,7 +47,6 @@ public class Film {
         this.duration = duration;
         this.rate = rate;
         this.mpa = mpa;
-        this.userLikes = new HashSet<>();
         validate();
     }
 
@@ -61,25 +54,6 @@ public class Film {
         if (releaseDate.isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Film can't be SO OLD!");
         }
-    }
-
-    public void putUserLike(int userId) {
-        if (userLikes.contains(userId)) {
-            throw new ModelAlreadyExistException("Film already liked by user");
-        }
-        userLikes.add(userId);
-    }
-
-    @JsonIgnore
-    public int getUserLikesCount() {
-        return userLikes.size();
-    }
-
-    public void deleteUserLike(int userId) {
-        if (!userLikes.contains(userId)) {
-            throw new ModelNotFoundException("Nothing to delete");
-        }
-        userLikes.remove(userId);
     }
 
     public Map<String, Object> toMap() {

@@ -97,5 +97,4 @@ public class FilmController {
         log.info("Get all genres");
         return filmService.getAllGenres();
     }
-
 }

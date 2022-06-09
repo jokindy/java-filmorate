@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -16,11 +18,16 @@ public class FilmService {
 
     private final FilmStorage storage;
     private final UserStorage userStorage;
+    private final GenreDbStorage genreStorage;
+    private final MpaDbStorage mpaStorage;
 
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage storage,
-                       @Qualifier("UserDbStorage") UserStorage userStorage) {
+    @Autowired
+    public FilmService(FilmStorage storage, UserStorage userStorage, GenreDbStorage genreDbStorage,
+                       MpaDbStorage mpaDbStorage) {
         this.storage = storage;
         this.userStorage = userStorage;
+        this.genreStorage = genreDbStorage;
+        this.mpaStorage = mpaDbStorage;
     }
 
     public Collection<Film> getFilms() {
@@ -40,11 +47,6 @@ public class FilmService {
     }
 
     public String deleteFilm(int id) {
-        Film film = storage.getFilmById(id);
-        Set<Integer> userLikes = new HashSet<>(film.getUserLikes());
-        for (Integer userLike : userLikes) {
-            userStorage.getUserById(userLike).deleteLike(id);
-        }
         storage.deleteFilmById(id);
         return "Film id: " + id + " deleted";
     }
@@ -66,19 +68,19 @@ public class FilmService {
     }
 
     public MPA getMpaByFilmId(int filmId) {
-        return storage.getMpaById(filmId);
+        return mpaStorage.getMpaById(filmId);
     }
 
     public Collection<MPA> getAllMpa() {
-        return storage.getAllMpa();
+        return mpaStorage.getAllMpa();
     }
 
     public Genre getGenreById(int filmId) {
-        return storage.getGenreById(filmId);
+        return genreStorage.getGenreById(filmId);
     }
 
     public Collection<Genre> getAllGenres() {
-        return storage.getAllGenres();
+        return genreStorage.getAllGenres();
     }
 
 
