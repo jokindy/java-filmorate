@@ -44,7 +44,6 @@ public class Film {
     @NotNull
     private MPA mpa;
 
-    @EqualsAndHashCode.Exclude
     private LinkedHashSet<Genre> genres;
 
     public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {

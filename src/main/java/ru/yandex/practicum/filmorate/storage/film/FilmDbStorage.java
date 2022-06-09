@@ -164,6 +164,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getSortedFilms() {
+        return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC", this::mapRowToFilm);
+    }
+
+    @Override
     public Collection<Film> getPopularFilms(int count) {
         return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC LIMIT ?", this::mapRowToFilm, count);
     }

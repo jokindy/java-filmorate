@@ -86,6 +86,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getSortedFilms() {
+        return null;
+    }
+
+    @Override
     public void deleteFilmById(int id) {
         if (map.containsKey(id)) {
             map.remove(id);

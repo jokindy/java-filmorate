@@ -82,11 +82,19 @@ public class FilmService {
     }
 
     public Collection<Film> getFilmsBySearch(String query, String by) {
-        if (!query.equals("empty") || !by.equals("empty")) {
-            return storage.getFilmsBySearch(query, by);
+        if (query == null && by == null) {
+            return storage.getSortedFilms();
+        } else if (query == null) {
+            throw new ModelNotFoundException("You must write query");
+        } else if (by == null) {
+            throw new ModelNotFoundException("You must write by");
         } else {
-            return storage.getPopularFilms(10);
+            return storage.getFilmsBySearch(query, by);
         }
+    }
+
+    private String[] handleParamBy(String by) {
+
     }
 
     private void checkIds(int filmId, int userId) {

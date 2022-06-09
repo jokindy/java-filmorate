@@ -56,13 +56,13 @@ public class FilmController {
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public String putLikeToFilm(@PathVariable  int filmId, @PathVariable  int userId) {
+    public String putLikeToFilm(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Put like to film id: {} from user id: {}", filmId, userId);
         return filmService.putLike(filmId, userId);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
-    public String deleteLike(@PathVariable  int filmId, @PathVariable int userId) {
+    public String deleteLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Delete film id: {}'s like from from user id: {}", filmId, userId);
         return filmService.deleteLike(filmId, userId);
     }
@@ -75,11 +75,9 @@ public class FilmController {
     }
 
     @GetMapping("/search")
-    public Collection<Film> getFoundFilms(@RequestParam String query,
-                                          @RequestParam(required = false, defaultValue = "empty") String by) {
+    public Collection<Film> getFoundFilms(@RequestParam(required = false) String query,
+                                          @RequestParam(required = false) String by) {
         log.info("Get films by searching");
-        System.out.println("QUERY - " + query);
-        System.out.println("by - " + by);
         return filmService.getFilmsBySearch(query, by);
     }
 
