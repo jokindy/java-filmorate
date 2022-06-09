@@ -140,6 +140,30 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+      /*  List<Film> foundFilms = new ArrayList<>();
+        if (!query.equals("empty")) {
+            List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
+            for (String name : names) {
+                String s = name.toLowerCase(Locale.ROOT);
+                if (s.contains(query)) {
+                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?",
+                            this::mapRowToFilm, name);
+                    foundFilms.add(film);
+                }
+            }
+        } else if (!by.equals("empty")) {
+            foundFilms = jdbcTemplate.query("SELECT * FROM films WHERE name = ?", this::mapRowToFilm, by);
+        }
+        if (foundFilms.isEmpty()) {
+            throw new ModelNotFoundException("Can't find films by these parameters");
+        } else {
+            return foundFilms;
+        }*/
+        return new ArrayList<>();
+    }
+
+    @Override
     public Collection<Film> getPopularFilms(int count) {
         return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC LIMIT ?", this::mapRowToFilm, count);
     }

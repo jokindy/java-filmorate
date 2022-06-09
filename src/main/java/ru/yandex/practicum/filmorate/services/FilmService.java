@@ -81,6 +81,13 @@ public class FilmService {
         return storage.getAllGenres();
     }
 
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+        if (!query.equals("empty") || !by.equals("empty")) {
+            return storage.getFilmsBySearch(query, by);
+        } else {
+            return storage.getPopularFilms(10);
+        }
+    }
 
     private void checkIds(int filmId, int userId) {
         if (!storage.isContains(filmId)) {

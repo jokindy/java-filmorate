@@ -80,6 +80,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+        //реализовано в БД
+        return null;
+    }
+
+    @Override
     public void deleteFilmById(int id) {
         if (map.containsKey(id)) {
             map.remove(id);

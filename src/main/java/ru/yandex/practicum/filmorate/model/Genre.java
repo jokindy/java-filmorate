@@ -1,12 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode
 @Data
 public class Genre {
 
     private int id;
 
+    @EqualsAndHashCode.Exclude
     private String name;
 
     public Genre(int id) {

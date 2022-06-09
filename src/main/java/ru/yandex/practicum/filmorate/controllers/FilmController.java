@@ -74,6 +74,15 @@ public class FilmController {
         return filmService.getPopularFilms(count);
     }
 
+    @GetMapping("/search")
+    public Collection<Film> getFoundFilms(@RequestParam String query,
+                                          @RequestParam(required = false, defaultValue = "empty") String by) {
+        log.info("Get films by searching");
+        System.out.println("QUERY - " + query);
+        System.out.println("by - " + by);
+        return filmService.getFilmsBySearch(query, by);
+    }
+
     @GetMapping("/mpa/{filmId}")
     public MPA getMpaById(@PathVariable int filmId) {
         log.info("Get MPA by id: {}", filmId);
