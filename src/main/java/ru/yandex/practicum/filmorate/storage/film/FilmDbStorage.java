@@ -42,6 +42,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private void handleGenres(Film film, int filmId) {
         Set<Genre> genres = film.getGenres();
+        System.out.println("GENRES - " + genres);
         if (genres != null) {
             for (Genre genre : genres) {
                 jdbcTemplate.update("INSERT INTO film_genres(film_id, genre_id) " +

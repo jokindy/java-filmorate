@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,6 +8,8 @@ import lombok.EqualsAndHashCode;
 public class MPA {
 
     private int id;
+
+    @EqualsAndHashCode.Exclude
     private String name;
 
     public MPA(int id) {

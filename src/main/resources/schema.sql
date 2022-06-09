@@ -14,8 +14,6 @@ create table IF NOT EXISTS FILM_GENRES
 (
     FILM_ID  INTEGER,
     GENRE_ID INTEGER not null,
-    constraint FILM_GENRES_PK
-        primary key (GENRE_ID),
     constraint FILM_ID
         foreign key (FILM_ID) references FILMS
             on delete cascade
@@ -72,4 +70,18 @@ CREATE TABLE IF NOT EXISTS FRIENDS
         foreign key (USER2_ID) references USERS
             on delete cascade
 );
+
+merge into mpa key (mpa_id)
+    values (1, 'G'),
+           (2, 'PG'),
+           (3, 'PG-13'),
+           (4, 'R'),
+           (5, 'NC-17');
+merge into GENRES key (GENRE_ID)
+    values (1, 'Комедия'),
+           (2, 'Драма'),
+           (3, 'Мультфильм'),
+           (4, 'Ужасы'),
+           (5, 'Триллер'),
+           (6, 'Детектив')
 
