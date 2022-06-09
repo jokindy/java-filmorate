@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 @Data
+@EqualsAndHashCode
 public class Genre {
 
     private int id;

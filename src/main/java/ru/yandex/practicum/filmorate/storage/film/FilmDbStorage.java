@@ -42,6 +42,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private void handleGenres(Film film, int filmId) {
         Set<Genre> genres = film.getGenres();
+        System.out.println("GENRES - " + genres);
         if (genres != null) {
             for (Genre genre : genres) {
                 jdbcTemplate.update("INSERT INTO film_genres(film_id, genre_id) " +
@@ -70,39 +71,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<MPA> getAllMpa() {
-        return jdbcTemplate.query("SELECT * FROM MPA", this::mapRowToMpa);
-    }
-
-    @Override
-    public Collection<Genre> getAllGenres() {
-        return jdbcTemplate.query("SELECT * FROM genres", this::mapRowToGenre);
-    }
-
-    @Override
     public Film getFilmById(int id) {
         try {
             return jdbcTemplate.queryForObject("SELECT * FROM films WHERE film_id = ?", this::mapRowToFilm, id);
         } catch (EmptyResultDataAccessException e) {
             throw new ModelNotFoundException(String.format("Film id: %s not found", id));
-        }
-    }
-
-    @Override
-    public MPA getMpaById(int id) {
-        try {
-            return jdbcTemplate.queryForObject("SELECT * FROM MPA WHERE mpa_id = ?", this::mapRowToMpa, id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ModelNotFoundException(String.format("Genre id: %s not found", id));
-        }
-    }
-
-    @Override
-    public Genre getGenreById(int id) {
-        try {
-            return jdbcTemplate.queryForObject("SELECT * FROM genres WHERE genre_id = ?", this::mapRowToGenre, id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ModelNotFoundException(String.format("Genre id: %s not found", id));
         }
     }
 
@@ -204,7 +177,4 @@ public class FilmDbStorage implements FilmStorage {
         return new Genre(genreRows.getInt("genre_id"));
     }
 
-    private MPA mapRowToMpa(ResultSet genreRows, int rowNum) throws SQLException {
-        return new MPA(genreRows.getInt("mpa_id"));
-    }
 }
