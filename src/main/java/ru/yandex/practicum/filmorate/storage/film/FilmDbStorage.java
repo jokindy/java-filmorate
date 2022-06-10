@@ -116,13 +116,18 @@ public class FilmDbStorage implements FilmStorage {
     public Collection<Film> getFilmsBySearch(String query, String by) {
         query = query.toLowerCase(Locale.ROOT);
         List<Film> films = new ArrayList<>();
-        List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
-        for (String name : names) {
-            if (name.contains(query)) {
-                Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?", this::mapRowToFilm,
-                        name);
-                films.add(film);
+        if (by.equals("title")) {
+            List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
+            for (String name : names) {
+                if (name.contains(query)) {
+                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?", this::mapRowToFilm,
+                            name);
+                    films.add(film);
+                }
             }
+        } else {
+            // реализация для поиску по режиссеру
+            return new ArrayList<>();
         }
         return films;
     }
