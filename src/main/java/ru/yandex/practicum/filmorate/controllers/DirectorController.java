@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.services.DirectorService;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -14,41 +14,41 @@ import java.util.Collection;
 @Validated
 public class DirectorController {
 
-    private final FilmService directorService;
+    private final DirectorService directorService;
 
-    public DirectorController(FilmService directorService) {
+    public DirectorController(DirectorService directorService) {
         this.directorService = directorService;
     }
 
-    @GetMapping("/films")
-    public Collection<Film> findAll() {
+    @GetMapping("/directors")
+    public Collection<Director> findAll() {
         log.info("Get director");
-        return directorService.getFilms();
+        return directorService.getDirectors();
     }
 
-    @PostMapping("/films")
-    public Film add(@Valid @RequestBody Film film) {
-        log.info("Add film");
-        directorService.addFilm(film);
-        return film;
+    @PostMapping("/directors")
+    public Director add(@Valid @RequestBody Director director) {
+        log.info("Add director");
+        directorService.addDirector(director);
+        return director;
     }
 
-    @PutMapping("/films")
-    public Film update(@Valid @RequestBody Film film) {
-        log.info("Put film");
-        directorService.putFilm(film);
-        return film;
+    @PutMapping("/directors")
+    public Director update(@Valid @RequestBody Director director) {
+        log.info("Put director");
+        directorService.putDirector(director);
+        return director;
     }
 
-    @GetMapping("/films/{filmId}")
-    public Film getFilm(@PathVariable int filmId) {
-        log.info("Get user by id: {}", filmId);
-        return directorService.getFilm(filmId);
+    @GetMapping("/directors/{directorId}")
+    public Director getFilm(@PathVariable int directorId) {
+        log.info("Get director by id: {}", directorId);
+        return directorService.getDirector(directorId);
     }
 
-    @DeleteMapping("/films/{filmId}")
-    public String deleteFilm(@PathVariable int filmId) {
-        log.info("Delete film by id: {}", filmId);
-        return directorService.deleteFilm(filmId);
+    @DeleteMapping("/directors/{directorId}")
+    public String deleteDirector(@PathVariable int directorId) {
+        log.info("Delete director by id: {}", directorId);
+        return directorService.deleteDirector(directorId);
     }
 }

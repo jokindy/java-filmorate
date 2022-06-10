@@ -1,38 +1,38 @@
 package ru.yandex.practicum.filmorate.services;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.storage.film.DirectorDbStorage;
 
 import java.util.Collection;
 
 @Service
 public class DirectorService {
 
-    private final FilmStorage storage;
+    private final DirectorDbStorage storage;
 
-    public DirectorService(FilmStorage storage) {
+    public DirectorService(DirectorDbStorage storage) {
         this.storage = storage;
     }
 
-    public Collection<Film> getFilms() {
-        return storage.getFilms();
+    public Collection<Director> getDirectors() {
+        return storage.getDirectors();
     }
 
-    public void addFilm(Film film) {
-        storage.add(film);
+    public void addDirector(Director director) {
+        storage.add(director);
     }
 
-    public void putFilm(Film film) {
-        storage.put(film);
+    public void putDirector(Director director) {
+        storage.put(director);
     }
 
-    public Film getFilm(int id) {
-        return storage.getFilmById(id);
+    public Director getDirector(int id) {
+        return storage.getDirectorById(id);
     }
 
-    public String deleteFilm(int id) {
-        storage.deleteFilmById(id);
-        return "Film id: " + id + " deleted";
+    public String deleteDirector(int id) {
+        storage.deleteDirectorById(id);
+        return "Director id: " + id + " deleted";
     }
 }

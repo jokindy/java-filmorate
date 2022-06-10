@@ -1,16 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.FilmDTO;
 
 import java.util.Collection;
 
 public interface FilmStorage {
 
-    void add(Film film);
+    void add(FilmDTO filmDTO);
 
-    void put(Film film);
+    void put(FilmDTO filmDTO);
 
     Collection<Film> getFilms();
 
@@ -23,6 +22,8 @@ public interface FilmStorage {
     void deleteLike(int id, int userId);
 
     Collection<Film> getPopularFilms(int count);
+
+    Collection<Film> getDirectorFilms(int directorId, String sort);
 
     boolean isContains(int id);
 }
