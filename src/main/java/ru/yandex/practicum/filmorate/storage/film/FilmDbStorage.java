@@ -123,6 +123,17 @@ public class FilmDbStorage implements FilmStorage {
         return filmRows.next();
     }
 
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE," +
+                "f.MPA_ID\n" +
+                "FROM USER_LIKES AS UL\n" +
+                "         LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID\n" +
+                "WHERE USER_ID = ?\n" +
+                "  AND UL.film_id IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?)\n" +
+                "ORDER BY f.RATE DESC;",this::mapRowToFilm,userId,friendId);
+    }
+
     private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
         int id = filmRows.getInt("film_id");
         String name = filmRows.getString("name");

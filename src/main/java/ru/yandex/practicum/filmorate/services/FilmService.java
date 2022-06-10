@@ -92,4 +92,7 @@ public class FilmService {
             throw new ModelNotFoundException(String.format("User id: %s not found", userId));
         }
     }
+    public Collection<Film> getCommonFilms(int userID, int friendId) {
+        return storage.getCommonFilms(userID, friendId);
+    }
 }
