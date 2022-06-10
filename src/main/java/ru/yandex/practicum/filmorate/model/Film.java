@@ -40,6 +40,8 @@ public class Film {
 
     private LinkedHashSet<Genre> genres;
 
+    private Director director;
+
     public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
         this.name = name;
         this.description = description;
