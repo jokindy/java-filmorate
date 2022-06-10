@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.UnsupportedOperationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -86,17 +87,35 @@ public class FilmService {
     public Collection<Film> getFilmsBySearch(String query, String by) {
         if (query == null && by == null) {
             return storage.getSortedFilms();
-        } else if (query == null) {
-            throw new ModelNotFoundException("You must write query");
-        } else if (by == null) {
-            throw new ModelNotFoundException("You must write by");
+        } else if (query == null || query.isEmpty()) {
+            throw new UnsupportedOperationException("Query must be specified");
+        } else if (by == null || by.isEmpty()) {
+            throw new UnsupportedOperationException("Parameters must be specified");
         } else {
-            return storage.getFilmsBySearch(query, by);
+            String[] params = handleParamBy(by);
+            if (params.length == 1) {
+                return storage.getFilmsBySearch(query, params[0]);
+            } else {
+                List<Film> films = new ArrayList<>();
+                for (String param : params) {
+                    films.addAll(storage.getFilmsBySearch(query, param));
+                }
+                return films;
+            }
         }
     }
 
     private String[] handleParamBy(String by) {
-
+        String[] params = by.split(",");
+        if (params.length > 2) {
+            throw new UnsupportedOperationException("Too much parameters for query");
+        }
+        for (String param : params) {
+            if (!param.equals("title") && !param.equals("director")) {
+                throw new UnsupportedOperationException("Unsupported parameter - " + params[0]);
+            }
+        }
+        return params;
     }
 
     private void checkIds(int filmId, int userId) {
