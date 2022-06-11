@@ -5,23 +5,17 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 public class UserService {
 
     private final UserStorage storage;
-    private final FilmStorage filmStorage;
 
-    public UserService(@Qualifier("UserDbStorage") UserStorage storage,
-                       @Qualifier("InMemoryFilmStorage") FilmStorage filmStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
         this.storage = storage;
-        this.filmStorage = filmStorage;
     }
 
     public Collection<User> getUsers() {
@@ -41,11 +35,6 @@ public class UserService {
     }
 
     public String deleteUser(int userId) {
-        User user = storage.getUserById(userId);
-        Set<Integer> likedFilmsId = new HashSet<>(user.getLikedFilmsId());
-        for (Integer filmId : likedFilmsId) {
-            filmStorage.deleteLike(filmId, userId);
-        }
         storage.deleteUserById(userId);
         return "User id: " + userId + " deleted";
     }

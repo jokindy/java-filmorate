@@ -1,60 +1,69 @@
-CREATE TABLE IF NOT EXISTS `Films`
+create table IF NOT EXISTS FILMS
 (
-    `film_id`      int PRIMARY KEY AUTO_INCREMENT,
-    `name`         varchar(100),
-    `description`  varchar(200),
-    `release_date` date,
-    `duration`     int,
-    `rate`         int,
-    `MPA`          int
+    FILM_ID      INTEGER auto_increment
+        primary key,
+    NAME         CHARACTER VARYING(100),
+    DESCRIPTION  CHARACTER VARYING(200),
+    RELEASE_DATE DATE,
+    DURATION     INTEGER,
+    RATE         INTEGER,
+    MPA_ID       INTEGER,
+    DIRECTOR_ID  INTEGER
 );
 
-create table if not exists FILM_GENRES
+create table IF NOT EXISTS FILM_GENRES
 (
-    FILM_ID  INTEGER not null,
+    FILM_ID  INTEGER,
     GENRE_ID INTEGER not null,
-    primary key (FILM_ID, GENRE_ID),
-    constraint FILM_GENRES_FILMS_FILM_ID_FK
+    constraint FILM_ID
         foreign key (FILM_ID) references FILMS
-            on update cascade on delete cascade,
-    constraint FILM_GENRES_GENRES_GENRE_ID_FK
-        foreign key (GENRE_ID) references GENRES
-            on update cascade on delete cascade
-);
-
-CREATE TABLE IF NOT EXISTS `Genres`
-(
-    `genre_id` int PRIMARY KEY AUTO_INCREMENT,
-    `name`     varchar(100)
-);
-
-CREATE TABLE IF NOT EXISTS `User_Likes`
-(
-    FILM_ID INTEGER,
-    USER_ID INTEGER,
-    constraint USER_LIKES_FILMS_FILM_ID_FK
-        foreign key (FILM_ID) references FILMS
-            on delete cascade,
-    constraint USER_LIKES_USERS_USER_ID_FK
-        foreign key (USER_ID) references USERS
             on delete cascade
 );
 
-CREATE TABLE IF NOT EXISTS `Users`
+create table IF NOT EXISTS GENRES
 (
-    `user_id`  int PRIMARY KEY AUTO_INCREMENT,
-    `email`    varchar(50) NOT NULL,
-    `login`    varchar(50),
-    `name`     varchar(50),
-    `birthday` date
+    GENRE_ID INTEGER,
+    NAME     CHARACTER VARYING
 );
 
-CREATE TABLE IF NOT EXISTS `Friends`
+create table IF NOT EXISTS MPA
 (
-    USER1_ID INTEGER not null,
-    USER2_ID INTEGER not null,
-    STATUS   BOOLEAN,
-    primary key (USER1_ID, USER2_ID),
+    MPA_ID INTEGER not null,
+    NAME   CHARACTER VARYING
+);
+
+
+create table IF NOT EXISTS USERS
+(
+    USER_ID  INTEGER auto_increment
+        primary key,
+    EMAIL    CHARACTER VARYING(50) not null,
+    LOGIN    CHARACTER VARYING(50),
+    NAME     CHARACTER VARYING(50),
+    BIRTHDAY DATE
+);
+
+CREATE TABLE IF NOT EXISTS USER_LIKES
+(
+    LIKE_ID integer AUTO_INCREMENT,
+    FILM_ID INTEGER,
+    USER_ID INTEGER,
+    primary key (LIKE_ID, FILM_ID, USER_ID),
+    constraint USER_LIKES_FILMS_FILM_ID_FK
+        foreign key (FILM_ID) references FILMS
+            on update cascade on delete cascade,
+    constraint USER_LIKES_USERS_USER_ID_FK
+        foreign key (USER_ID) references USERS
+            on update cascade on delete cascade
+);
+
+CREATE TABLE IF NOT EXISTS FRIENDS
+(
+    FRIEND_ID INTEGER AUTO_INCREMENT,
+    USER1_ID  INTEGER not null,
+    USER2_ID  INTEGER not null,
+    STATUS    BOOLEAN,
+    primary key (FRIEND_ID, USER1_ID, USER2_ID),
     constraint FRIENDS_USERS_USER_ID_FK
         foreign key (USER1_ID) references USERS
             on delete cascade,
@@ -62,4 +71,26 @@ CREATE TABLE IF NOT EXISTS `Friends`
         foreign key (USER2_ID) references USERS
             on delete cascade
 );
+
+create table IF NOT EXISTS DIRECTORS
+(
+    DIRECTOR_ID INTEGER auto_increment,
+    NAME        CHARACTER VARYING,
+    constraint DIRECTORS_PK
+        primary key (DIRECTOR_ID)
+);
+
+merge into mpa key (mpa_id)
+    values (1, 'G'),
+           (2, 'PG'),
+           (3, 'PG-13'),
+           (4, 'R'),
+           (5, 'NC-17');
+merge into GENRES key (GENRE_ID)
+    values (1, 'Комедия'),
+           (2, 'Драма'),
+           (3, 'Мультфильм'),
+           (4, 'Ужасы'),
+           (5, 'Триллер'),
+           (6, 'Детектив')
 

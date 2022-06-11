@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -14,23 +14,32 @@ public class FilmService {
 
     private final FilmStorage storage;
     private final UserStorage userStorage;
+    private final GenreDbStorage genreStorage;
+    private final MpaDbStorage mpaStorage;
+    private final DirectorDbStorage directorStorage;
 
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage storage,
-                       @Qualifier("UserDbStorage") UserStorage userStorage) {
+    @Autowired
+    public FilmService(FilmStorage storage, UserStorage userStorage, GenreDbStorage genreDbStorage,
+                       MpaDbStorage mpaDbStorage, DirectorDbStorage directorDbStorage) {
         this.storage = storage;
         this.userStorage = userStorage;
+        this.genreStorage = genreDbStorage;
+        this.mpaStorage = mpaDbStorage;
+        this.directorStorage = directorDbStorage;
     }
 
     public Collection<Film> getFilms() {
         return storage.getFilms();
     }
 
-    public void addFilm(Film film) {
-        storage.add(film);
+    public void addFilm(FilmDTO filmDTO) {
+        checkDirectorId(filmDTO);
+        storage.add(filmDTO);
     }
 
-    public void putFilm(Film film) {
-        storage.put(film);
+    public void putFilm(FilmDTO filmDTO) {
+        checkDirectorId(filmDTO);
+        storage.put(filmDTO);
     }
 
     public Film getFilm(int id) {
@@ -38,11 +47,6 @@ public class FilmService {
     }
 
     public String deleteFilm(int id) {
-        Film film = storage.getFilmById(id);
-        Set<Integer> userLikes = new HashSet<>(film.getUserLikes());
-        for (Integer userLike : userLikes) {
-            userStorage.getUserById(userLike).deleteLike(id);
-        }
         storage.deleteFilmById(id);
         return "Film id: " + id + " deleted";
     }
@@ -59,9 +63,36 @@ public class FilmService {
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 
+    public Collection<Film> getDirectorFilms(int directorId, String sort) {
+        if (!directorStorage.isContains(directorId)) {
+            throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
+        }
+        if (!sort.equals("like") && !sort.equals("year")) {
+            throw new UnsupportedOperationException(String.format("Sort by %s is not supported", sort));
+        }
+        return storage.getDirectorFilms(directorId, sort);
+    }
+
     public Collection<Film> getPopularFilms(int count) {
         return storage.getPopularFilms(count);
     }
+
+    public MPA getMpaByFilmId(int filmId) {
+        return mpaStorage.getMpaById(filmId);
+    }
+
+    public Collection<MPA> getAllMpa() {
+        return mpaStorage.getAllMpa();
+    }
+
+    public Genre getGenreById(int filmId) {
+        return genreStorage.getGenreById(filmId);
+    }
+
+    public Collection<Genre> getAllGenres() {
+        return genreStorage.getAllGenres();
+    }
+
 
     private void checkIds(int filmId, int userId) {
         if (!storage.isContains(filmId)) {
@@ -69,6 +100,13 @@ public class FilmService {
         }
         if (!userStorage.isContains(userId)) {
             throw new ModelNotFoundException(String.format("User id: %s not found", userId));
+        }
+    }
+
+    private void checkDirectorId(FilmDTO filmDTO) {
+        int directorId = filmDTO.getDirector().get(0).getId();
+        if (!directorStorage.isContains(directorId)) {
+            throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
         }
     }
 }

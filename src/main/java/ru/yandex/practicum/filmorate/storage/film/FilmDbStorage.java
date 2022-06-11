@@ -7,14 +7,12 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
@@ -26,29 +24,46 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void add(Film film) {
+    public void add(FilmDTO filmDTO) {
+        Film film = new Film(filmDTO);
+        int directorId = film.getDirector().getId();
         Collection<Film> films = getFilms();
         if (!films.contains(film)) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                     .withTableName("films")
                     .usingGeneratedKeyColumns("film_id");
-            int id = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
-            film.setId(id);
+            int filmId = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
+            filmDTO.setId(filmId);
+            handleGenres(film, filmId);
         } else {
             throw new ModelAlreadyExistException("This film is already added");
         }
     }
 
+    private void handleGenres(Film film, int filmId) {
+        Set<Genre> genres = film.getGenres();
+        if (genres != null) {
+            for (Genre genre : genres) {
+                jdbcTemplate.update("INSERT INTO film_genres(film_id, genre_id) " +
+                        "VALUES (?, ?)", filmId, genre.getId());
+            }
+        }
+    }
+
     @Override
-    public void put(Film film) {
+    public void put(FilmDTO filmDTO) {
+        Film film = new Film(filmDTO);
         int filmId = film.getId();
         Film anotherFilm = getFilmById(filmId);
         if (film.equals(anotherFilm)) {
             throw new ModelAlreadyExistException("Film id: " + filmId + " is the same");
         }
         jdbcTemplate.update("UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
-                        "rate = ?, MPA = ? WHERE film_id = ?", film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), filmId);
+                        "rate = ?, MPA_ID = ?, DIRECTOR_ID = ? WHERE film_id = ?", film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(),
+                film.getDirector().getId(), filmId);
+        jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?", filmId);
+        handleGenres(film, filmId);
     }
 
     @Override
@@ -104,22 +119,53 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean isContains(int id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE film_id = ?", id);
-        return userRows.next();
+    public Collection<Film> getDirectorFilms(int directorId, String sort) {
+        String sql = "SELECT * FROM films WHERE director_id = ? ORDER BY ";
+        if (sort.equals("like")) {
+            sql += "RATE DESC";
+        } else {
+            sql += "RELEASE_DATE DESC";
+        }
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
-    private Film mapRowToFilm(ResultSet userRows, int rowNum) throws SQLException {
-        int id = userRows.getInt("film_id");
-        String name = userRows.getString("name");
-        String description = userRows.getString("description");
-        LocalDate releaseDate = userRows.getDate("release_date").toLocalDate();
-        int duration = userRows.getInt("duration");
-        int rate = userRows.getInt("rate");
-        int mpaId = userRows.getInt("mpa");
+    @Override
+    public boolean isContains(int id) {
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE film_id = ?", id);
+        return filmRows.next();
+    }
+
+    private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
+        int id = filmRows.getInt("film_id");
+        String name = filmRows.getString("name");
+        String description = filmRows.getString("description");
+        LocalDate releaseDate = filmRows.getDate("release_date").toLocalDate();
+        int duration = filmRows.getInt("duration");
+        int rate = filmRows.getInt("rate");
+        int mpaId = filmRows.getInt("mpa_id");
         MPA mpa = new MPA(mpaId);
-        Film film = new Film(name, description, releaseDate, duration, rate, mpa);
+        int directorId = filmRows.getInt("director_id");
+        Director director = jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?",
+                this::mapRowToDirector, directorId);
+        Film film = new Film(name, description, releaseDate, duration, rate, mpa, director);
         film.setId(id);
+        List<Genre> genres = jdbcTemplate.query("SELECT * FROM film_genres WHERE film_id = ?",
+                this::mapRowToGenre, id);
+        if (!genres.isEmpty()) {
+            film.setGenres(new LinkedHashSet<>(genres));
+        } else {
+            film.setGenres(null);
+        }
         return film;
+    }
+
+    private Genre mapRowToGenre(ResultSet genreRows, int rowNum) throws SQLException {
+        return new Genre(genreRows.getInt("genre_id"));
+    }
+
+    private Director mapRowToDirector(ResultSet directorRows, int rowNum) throws SQLException {
+        int id = directorRows.getInt("director_id");
+        String name = directorRows.getString("name");
+        return new Director(id, name);
     }
 }
