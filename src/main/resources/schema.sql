@@ -7,7 +7,8 @@ create table IF NOT EXISTS FILMS
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     RATE         INTEGER,
-    MPA_ID       INTEGER
+    MPA_ID       INTEGER,
+    DIRECTOR_ID  INTEGER
 );
 
 create table IF NOT EXISTS FILM_GENRES
@@ -69,6 +70,14 @@ CREATE TABLE IF NOT EXISTS FRIENDS
     constraint FRIENDS_USERS_USER_ID_FK_2
         foreign key (USER2_ID) references USERS
             on delete cascade
+);
+
+create table IF NOT EXISTS DIRECTORS
+(
+    DIRECTOR_ID INTEGER auto_increment,
+    NAME        CHARACTER VARYING,
+    constraint DIRECTORS_PK
+        primary key (DIRECTOR_ID)
 );
 
 merge into mpa key (mpa_id)
