@@ -67,11 +67,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteUserById(int id) {
-        try {
-            jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ModelNotFoundException(String.format("User id: %s not found", id));
-        }
+        getUserById(id);
+        jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id);
     }
 
     @Override
