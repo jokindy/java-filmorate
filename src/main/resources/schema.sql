@@ -70,12 +70,23 @@ CREATE TABLE IF NOT EXISTS FRIENDS
             on delete cascade
 );
 
+CREATE TABLE IF NOT EXISTS EVENTS
+(
+    event_id   int primary key auto_increment,
+    timestamp  timestamp,
+    user_Id    int references USERS,
+    event_Type enum ('LIKE', 'REVIEW', 'FRIEND'),
+    operation  enum ('REMOVE', 'ADD', 'UPDATE'),
+    entity_Id  int
+);
+
 create table IF NOT EXISTS DIRECTORS
 (
     DIRECTOR_ID INTEGER auto_increment,
     NAME        CHARACTER VARYING,
     constraint DIRECTORS_PK
         primary key (DIRECTOR_ID)
+
 );
 
 merge into mpa key (mpa_id)

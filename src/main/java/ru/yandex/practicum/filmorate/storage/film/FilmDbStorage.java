@@ -97,6 +97,10 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("INSERT INTO user_likes(film_id, user_id) VALUES (?, ?)", id, userId);
         jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?",
                 (getFilmById(id).getRate() + 1), id);
+        jdbcTemplate.update(
+                "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
+                        "VALUES (now(), ?, 'LIKE', 'ADD', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
+                userId, id, userId);
     }
 
     @Override
@@ -104,6 +108,10 @@ public class FilmDbStorage implements FilmStorage {
         List<Integer> userLikes = jdbcTemplate.queryForList("SELECT user_id FROM user_likes WHERE film_id = ?",
                 Integer.class, id);
         if (userLikes.contains(userId)) {
+            jdbcTemplate.update(
+                    "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
+                            "VALUES (now(), ?, 'LIKE', 'REMOVE', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
+                    userId, id, userId);
             jdbcTemplate.update("DELETE FROM user_likes WHERE film_id = ? AND user_id = ?", id, userId);
             jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?", (getFilmById(id).getRate() - 1), id);
         } else {
