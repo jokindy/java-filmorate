@@ -113,4 +113,10 @@ public class FilmController {
         log.info("Get all genres");
         return filmService.getAllGenres();
     }
+
+    @GetMapping("films/common/userId={userId}&friendId={friendId}")
+    public Collection<Film> commonFilms(@PathVariable("userId") int userId, @PathVariable("friendId") int friendId) {
+        log.info("Found shared movies for users with id: {}, {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }

@@ -1,14 +1,21 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.MpaDbStorage;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
+@AllArgsConstructor
 @Service
 public class FilmService {
 
@@ -17,16 +24,7 @@ public class FilmService {
     private final GenreDbStorage genreStorage;
     private final MpaDbStorage mpaStorage;
     private final DirectorDbStorage directorStorage;
-
-    @Autowired
-    public FilmService(FilmStorage storage, UserStorage userStorage, GenreDbStorage genreDbStorage,
-                       MpaDbStorage mpaDbStorage, DirectorDbStorage directorDbStorage) {
-        this.storage = storage;
-        this.userStorage = userStorage;
-        this.genreStorage = genreDbStorage;
-        this.mpaStorage = mpaDbStorage;
-        this.directorStorage = directorDbStorage;
-    }
+    private final UserService userService;
 
     public Collection<Film> getFilms() {
         return storage.getFilms();
@@ -137,10 +135,17 @@ public class FilmService {
         }
     }
 
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        userService.checkIds(userId, friendId);
+        return storage.getCommonFilms(userId, friendId);
+    }
+
+
     private void checkDirectorId(FilmDTO filmDTO) {
         int directorId = filmDTO.getDirector().get(0).getId();
         if (!directorStorage.isContains(directorId)) {
             throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
         }
     }
+
 }

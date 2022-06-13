@@ -123,18 +123,26 @@ public class FilmDbStorage implements FilmStorage {
     public Collection<Film> getFilmsBySearch(String query, String by) {
         query = query.toLowerCase(Locale.ROOT);
         List<Film> films = new ArrayList<>();
-        if (by.equals("title")) {
+        if ("title".equals(by)) {
             List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
             for (String name : names) {
-                if (name.contains(query)) {
+                String filmName = name.toLowerCase(Locale.ROOT);
+                if (filmName.contains(query)) {
                     Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?", this::mapRowToFilm,
                             name);
                     films.add(film);
                 }
             }
         } else {
-            // реализация для поиску по режиссеру
-            return new ArrayList<>();
+            List<Director> directors = jdbcTemplate.query("SELECT * FROM directors", this::mapRowToDirector);
+            for (Director director : directors) {
+                String directorName = director.getName().toLowerCase(Locale.ROOT);
+                if (directorName.contains(query)) {
+                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE director_id = ?",
+                            this::mapRowToFilm, director.getId());
+                    films.add(film);
+                }
+            }
         }
         return films;
     }
@@ -190,6 +198,14 @@ public class FilmDbStorage implements FilmStorage {
     public boolean isContains(int id) {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("SELECT * FROM films WHERE film_id = ?", id);
         return filmRows.next();
+    }
+
+    @Override
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE, f.MPA_ID" +
+                        " FROM USER_LIKES AS UL LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID WHERE USER_ID = ? AND UL.film_id" +
+                        " IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?) ORDER BY f.RATE DESC;", this::mapRowToFilm,
+                userId, friendId);
     }
 
     private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
