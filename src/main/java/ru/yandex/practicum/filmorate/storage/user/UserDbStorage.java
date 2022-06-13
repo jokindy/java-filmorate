@@ -13,21 +13,27 @@ import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.event.EventType;
 import ru.yandex.practicum.filmorate.model.event.Operations;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Director;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MPA;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
+    private final FilmStorage filmStorage;
+
+    public UserDbStorage(JdbcTemplate jdbcTemplate, FilmStorage filmStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.filmStorage = filmStorage;
     }
 
     @Override
@@ -218,5 +224,78 @@ public class UserDbStorage implements UserStorage {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    @Override
+    public Collection<Film> getRecommendationFilms(int userId){
+        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE,f.MPA_ID," +
+                        "f.DIRECTOR_ID FROM (SELECT USER_ID, film_id, count(film_id) AS count FROM(SELECT  FILM_ID, USER_ID " +
+                        "FROM USER_LIKES WHERE USER_ID = ? UNION ALL SELECT  FILM_ID, USER_ID FROM USER_LIKES " +
+                        "WHERE USER_ID = ?) GROUP BY film_id, USER_ID) AS fl INNER JOIN FILMS AS f ON fl.FILM_ID=f.FILM_ID " +
+                        "WHERE count = 1 AND fl.USER_ID=?;",this::mapRowToFilm,userId,idUserMaxCommonFilms(userId),
+                idUserMaxCommonFilms(userId));
+    }
+
+    public Integer idUserMaxCommonFilms(int idUser){
+        int id = 0;
+        int count=0;
+        Map<Integer,Integer> countsFilms = new HashMap<>();
+        for(Integer idU: getIdsUsers()){
+            if(idUser==idU){
+            }else {
+                countsFilms.put(idU, filmStorage.getCommonFilms(idUser, idU).size());
+            }
+        }
+
+        for(Integer i:countsFilms.keySet()){
+            if(countsFilms.get(i)>count){
+                count=countsFilms.get(i);
+                id=i;
+            }
+        }
+        return id;
+    }
+
+    public Collection<Integer> getIdsUsers(){
+        List<Integer> allUserIds = new ArrayList<>();
+        Collection<User> allUsers = getUsers();
+        for(User user: allUsers){
+            allUserIds.add(user.getId());
+        }
+        return allUserIds;
+    }
+
+    private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
+        int id = filmRows.getInt("film_id");
+        String name = filmRows.getString("name");
+        String description = filmRows.getString("description");
+        LocalDate releaseDate = filmRows.getDate("release_date").toLocalDate();
+        int duration = filmRows.getInt("duration");
+        int rate = filmRows.getInt("rate");
+        int mpaId = filmRows.getInt("mpa_id");
+        MPA mpa = new MPA(mpaId);
+        int directorId = filmRows.getInt("director_id");
+        Director director = jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?",
+                this::mapRowToDirector, directorId);
+        Film film = new Film(name, description, releaseDate, duration, rate, mpa, director);
+        film.setId(id);
+        List<Genre> genres = jdbcTemplate.query("SELECT * FROM film_genres WHERE film_id = ?",
+                this::mapRowToGenre, id);
+        if (!genres.isEmpty()) {
+            film.setGenres(new LinkedHashSet<>(genres));
+        } else {
+            film.setGenres(null);
+        }
+        return film;
+    }
+
+    private Director mapRowToDirector(ResultSet directorRows, int rowNum) throws SQLException {
+        int id = directorRows.getInt("director_id");
+        String name = directorRows.getString("name");
+        return new Director(id, name);
+    }
+
+    private Genre mapRowToGenre(ResultSet genreRows, int rowNum) throws SQLException {
+        return new Genre(genreRows.getInt("genre_id"));
     }
 }

@@ -2,21 +2,25 @@ package ru.yandex.practicum.filmorate.services;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
+import java.util.*;
 
 @Service
 public class UserService {
 
     private final UserStorage storage;
+    private final FilmStorage filmStorage;
 
-    public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage storage, FilmStorage filmStorage) {
         this.storage = storage;
+        this.filmStorage = filmStorage;
     }
 
     public Collection<User> getUsers() {
@@ -86,4 +90,9 @@ public class UserService {
             throw new ModelNotFoundException(String.format("User id: %s not found", friendId));
         }
     }
+
+    public Collection<Film> getRecommendation(int userId){
+        return storage.getRecommendationFilms(userId);
+    }
+
 }

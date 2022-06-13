@@ -140,7 +140,6 @@ public class FilmService {
         return storage.getCommonFilms(userId, friendId);
     }
 
-
     private void checkDirectorId(FilmDTO filmDTO) {
         int directorId = filmDTO.getDirector().get(0).getId();
         if (!directorStorage.isContains(directorId)) {

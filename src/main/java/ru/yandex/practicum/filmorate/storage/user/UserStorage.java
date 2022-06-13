@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Film;
 
 import java.util.Collection;
 
@@ -30,4 +31,6 @@ public interface UserStorage {
     Collection<Event> getUserEvents(Integer userId);
 
     boolean isContains(int id);
+
+    Collection<Film> getRecommendationFilms(int userId);
 }

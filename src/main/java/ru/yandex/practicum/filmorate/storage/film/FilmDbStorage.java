@@ -24,6 +24,7 @@ public class FilmDbStorage implements FilmStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+
     @Override
     public void add(FilmDTO filmDTO) {
         Film film = new Film(filmDTO);
@@ -198,6 +199,9 @@ public class FilmDbStorage implements FilmStorage {
                 this::mapRowToFilm, userId, friendId);
     }
 
+
+
+
     private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
         int id = filmRows.getInt("film_id");
         String name = filmRows.getString("name");
@@ -231,4 +235,6 @@ public class FilmDbStorage implements FilmStorage {
         String name = directorRows.getString("name");
         return new Director(id, name);
     }
+
+
 }

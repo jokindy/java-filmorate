@@ -32,4 +32,5 @@ public interface FilmStorage {
     boolean isContains(int id);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
+
 }
