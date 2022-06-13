@@ -111,6 +111,31 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+        query = query.toLowerCase(Locale.ROOT);
+        List<Film> films = new ArrayList<>();
+        if (by.equals("title")) {
+            List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
+            for (String name : names) {
+                if (name.contains(query)) {
+                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?", this::mapRowToFilm,
+                            name);
+                    films.add(film);
+                }
+            }
+        } else {
+            // реализация для поиску по режиссеру
+            return new ArrayList<>();
+        }
+        return films;
+    }
+  
+  @Override
+    public Collection<Film> getPopularFilms(int count) {
+        return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC LIMIT ?", this::mapRowToFilm, count);
+  
+  
+  @Override
     public Collection<Film> getPopularFilms(int count, int genreId, int year) {
         if (genreId < 0 || year < 0) {
             throw new ValidationException("Cannot be negative");

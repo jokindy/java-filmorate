@@ -56,13 +56,13 @@ public class FilmController {
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public String putLikeToFilm(@PathVariable  int filmId, @PathVariable  int userId) {
+    public String putLikeToFilm(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Put like to film id: {} from user id: {}", filmId, userId);
         return filmService.putLike(filmId, userId);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
-    public String deleteLike(@PathVariable  int filmId, @PathVariable int userId) {
+    public String deleteLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Delete film id: {}'s like from from user id: {}", filmId, userId);
         return filmService.deleteLike(filmId, userId);
     }
@@ -74,6 +74,13 @@ public class FilmController {
                                             @RequestParam(required = false, defaultValue = "0") int year) {
         log.info("Get {} popular films", count);
         return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/search")
+    public Collection<Film> getFoundFilms(@RequestParam(required = false) String query,
+                                          @RequestParam(required = false) String by) {
+        log.info("Get films by searching");
+        return filmService.getFilmsBySearch(query, by);
     }
 
     @GetMapping("/mpa/{filmId}")
