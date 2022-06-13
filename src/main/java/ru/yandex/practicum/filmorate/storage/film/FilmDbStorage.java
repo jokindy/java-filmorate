@@ -99,8 +99,8 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?",
                 (getFilmById(id).getRate() + 1), id);
         jdbcTemplate.update(
-        "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
-            "VALUES (now(), ?, 'LIKE', 'ADD', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
+                "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
+                        "VALUES (now(), ?, 'LIKE', 'ADD', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
                 userId, id, userId);
     }
 
@@ -110,7 +110,7 @@ public class FilmDbStorage implements FilmStorage {
                 Integer.class, id);
         if (userLikes.contains(userId)) {
             jdbcTemplate.update(
-                    "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
+                    "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                             "VALUES (now(), ?, 'LIKE', 'REMOVE', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
                     userId, id, userId);
             jdbcTemplate.update("DELETE FROM user_likes WHERE film_id = ? AND user_id = ?", id, userId);

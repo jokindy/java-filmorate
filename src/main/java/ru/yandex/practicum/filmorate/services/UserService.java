@@ -71,9 +71,9 @@ public class UserService {
 
     public Set<Event> getUserFeed(Integer userId) {
         Collection<User> userFriends = storage.getUserFriends(userId);
-        Set<Event> userFeed = new TreeSet<>((e1,e2)->{
+        Set<Event> userFeed = new TreeSet<>((e1, e2) -> {
             if (e1.getTimestamp().isBefore(e2.getTimestamp())) return 1;
-            if(e1.getTimestamp().equals(e2.getTimestamp())) return 0;
+            if (e1.getTimestamp().equals(e2.getTimestamp())) return 0;
             return -1;
         });
         for (User u : userFriends) {

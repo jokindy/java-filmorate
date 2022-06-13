@@ -91,9 +91,9 @@ public class UserDbStorage implements UserStorage {
             jdbcTemplate.update("INSERT INTO friends(user1_id, user2_id, status) VALUES (?, ?, ?)",
                     id, friendId, false);
             jdbcTemplate.update(
-            "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
-                "VALUES (now(), ?, 'FRIEND', 'ADD', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))"
-                , id, id, friendId
+                    "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
+                            "VALUES (now(), ?, 'FRIEND', 'ADD', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))"
+                    , id, id, friendId
             );
         } else {
             throw new ModelAlreadyExistException(String.format("User id: %s already have invitation" +
@@ -111,7 +111,7 @@ public class UserDbStorage implements UserStorage {
             addFriendshipUpdateToEvents(id, friendId);
         } else if (isExistRight) {
             jdbcTemplate.update(sql, friendId, id);
-            addFriendshipUpdateToEvents(friendId,id);
+            addFriendshipUpdateToEvents(friendId, id);
         } else {
             throw new NoFriendsException(String.format("User id: %s don't have invitation" +
                     " or friendship with user id: %s", friendId, id));
@@ -132,13 +132,13 @@ public class UserDbStorage implements UserStorage {
         boolean isExistRight = isFriendsExists(friendId, id);
         if (isExistLeft) {
             jdbcTemplate.update(
-                    "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
+                    "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                             "VALUES (now(), ?, 'FRIEND', 'REMOVE', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))",
                     id, id, friendId);
             jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ? and user2_id = ?", id, friendId);
         } else if (isExistRight) {
             jdbcTemplate.update(
-                    "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
+                    "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                             "VALUES (now(), ?, 'FRIEND', 'REMOVE', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))",
                     friendId, friendId, id);
             jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ? and user2_id = ?", friendId, id);
@@ -157,7 +157,7 @@ public class UserDbStorage implements UserStorage {
     public Collection<Event> getUserEvents(Integer id) {
         //language=H2
         String sql = "select * from EVENTS where USER_ID=?";
-        return jdbcTemplate.query(sql, (rs, rowNum)-> makeEvent(rs), id);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> makeEvent(rs), id);
     }
 
     @Override
@@ -193,16 +193,17 @@ public class UserDbStorage implements UserStorage {
                 "SELECT FRIEND_ID FROM FRIENDS WHERE USER1_ID=? and USER2_ID=?", Integer.class, id1, id2
         );
         String eventRequestSql = "SELECT * FROM EVENTS " +
-                "WHERE USER_ID=? and EVENTTYPE='FRIEND' and OPERATION='UPDATE' and ENTITY_ID=?";
+                "WHERE USER_ID=? and EVENT_TYPE='FRIEND' and OPERATION='UPDATE' and ENTITY_ID=?";
         try {
-            Event event = jdbcTemplate.queryForObject(eventRequestSql, (rs,rowNum)->makeEvent(rs), id1,friendshipId);
+            jdbcTemplate.queryForObject(eventRequestSql, (rs, rowNum) -> makeEvent(rs), id1, friendshipId);
             throw new ModelAlreadyExistException("Friendship already confirmed!");
-        }catch (DataAccessException e) {
-            String sql = "INSERT INTO EVENTS(timestamp, user_id, eventtype, operation, entity_id) " +
+        } catch (DataAccessException e) {
+            String sql = "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                     "VALUES (now(), ?, 'FRIEND', 'UPDATE', ?)";
             jdbcTemplate.update(sql, id1, friendshipId);
         }
     }
+
     private String getFriendsQuery(int id) {
         String sql = "SELECT * FROM friends AS f\n LEFT JOIN users AS u ON f.user2_id = u.user_id\n" +
                 "WHERE user1_id = ?\n;";

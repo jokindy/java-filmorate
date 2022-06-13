@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS EVENTS
     event_id int primary key auto_increment,
     timestamp timestamp,
     user_Id int references USERS,
-    eventType enum('LIKE', 'REVIEW', 'FRIEND'),
+    event_Type enum('LIKE', 'REVIEW', 'FRIEND'),
     operation enum('REMOVE', 'ADD', 'UPDATE'),
     entity_Id int
 );
