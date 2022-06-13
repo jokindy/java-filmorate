@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -21,13 +22,16 @@ public class FilmService {
     private final GenreDbStorage genreStorage;
     private final MpaDbStorage mpaStorage;
 
+    private final UserService userService;
+
     @Autowired
     public FilmService(FilmStorage storage, UserStorage userStorage, GenreDbStorage genreDbStorage,
-                       MpaDbStorage mpaDbStorage) {
+                       MpaDbStorage mpaDbStorage, UserService userService) {
         this.storage = storage;
         this.userStorage = userStorage;
         this.genreStorage = genreDbStorage;
         this.mpaStorage = mpaDbStorage;
+        this.userService = userService;
     }
 
     public Collection<Film> getFilms() {
@@ -92,7 +96,18 @@ public class FilmService {
             throw new ModelNotFoundException(String.format("User id: %s not found", userId));
         }
     }
-    public Collection<Film> getCommonFilms(int userID, int friendId) {
-        return storage.getCommonFilms(userID, friendId);
+
+    public Collection<Film> getCommonFilms(int userId, int friendId) {
+        if (userId == friendId) {
+            throw new SameIdException("Same id");
+        }
+        if (!userStorage.isContains(userId)) {
+            throw new ModelNotFoundException(String.format("User id: %s not found", userId));
+        }
+        if (!userStorage.isContains(friendId)) {
+            throw new ModelNotFoundException(String.format("User id: %s not found", friendId));
+        }
+        return storage.getCommonFilms(userId, friendId);
     }
+
 }

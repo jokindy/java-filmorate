@@ -125,13 +125,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getCommonFilms(int userId, int friendId) {
-        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE," +
-                "f.MPA_ID\n" +
-                "FROM USER_LIKES AS UL\n" +
-                "         LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID\n" +
-                "WHERE USER_ID = ?\n" +
-                "  AND UL.film_id IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?)\n" +
-                "ORDER BY f.RATE DESC;",this::mapRowToFilm,userId,friendId);
+        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE, f.MPA_ID" +
+                " FROM USER_LIKES AS UL LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID WHERE USER_ID = ? AND UL.film_id" +
+                " IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?) ORDER BY f.RATE DESC;", this::mapRowToFilm,
+                userId, friendId);
     }
 
     private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {

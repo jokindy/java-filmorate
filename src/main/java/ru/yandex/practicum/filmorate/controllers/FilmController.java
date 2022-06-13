@@ -56,13 +56,13 @@ public class FilmController {
     }
 
     @PutMapping("/films/{filmId}/like/{userId}")
-    public String putLikeToFilm(@PathVariable  int filmId, @PathVariable  int userId) {
+    public String putLikeToFilm(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Put like to film id: {} from user id: {}", filmId, userId);
         return filmService.putLike(filmId, userId);
     }
 
     @DeleteMapping("/films/{filmId}/like/{userId}")
-    public String deleteLike(@PathVariable  int filmId, @PathVariable int userId) {
+    public String deleteLike(@PathVariable int filmId, @PathVariable int userId) {
         log.info("Delete film id: {}'s like from from user id: {}", filmId, userId);
         return filmService.deleteLike(filmId, userId);
     }
@@ -99,8 +99,8 @@ public class FilmController {
     }
 
     @GetMapping("films/common/userId={userId}&friendId={friendId}")
-    public Collection<Film> commonFilms (@PathVariable("userId") int userId, @PathVariable("friendId") int friendId){
-        log.info("Found shared movies for users with id: {} , {}", userId,friendId);
-        return filmService.getCommonFilms(userId,friendId);
+    public Collection<Film> commonFilms(@PathVariable("userId") int userId, @PathVariable("friendId") int friendId) {
+        log.info("Found shared movies for users with id: {} , {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
     }
 }
