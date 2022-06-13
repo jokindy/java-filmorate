@@ -1,13 +1,13 @@
 create table IF NOT EXISTS FILMS
 (
-    FILM_ID      INTEGER auto_increment
-        primary key,
+    FILM_ID      INTEGER auto_increment primary key,
     NAME         CHARACTER VARYING(100),
     DESCRIPTION  CHARACTER VARYING(200),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     RATE         INTEGER,
-    MPA_ID       INTEGER
+    MPA_ID       INTEGER,
+    DIRECTOR_ID  INTEGER
 );
 
 create table IF NOT EXISTS FILM_GENRES
@@ -34,8 +34,7 @@ create table IF NOT EXISTS MPA
 
 create table IF NOT EXISTS USERS
 (
-    USER_ID  INTEGER auto_increment
-        primary key,
+    USER_ID  INTEGER auto_increment primary key,
     EMAIL    CHARACTER VARYING(50) not null,
     LOGIN    CHARACTER VARYING(50),
     NAME     CHARACTER VARYING(50),
@@ -71,6 +70,25 @@ CREATE TABLE IF NOT EXISTS FRIENDS
             on delete cascade
 );
 
+CREATE TABLE IF NOT EXISTS EVENTS
+(
+    event_id   int primary key auto_increment,
+    timestamp  timestamp,
+    user_Id    int references USERS,
+    event_Type enum ('LIKE', 'REVIEW', 'FRIEND'),
+    operation  enum ('REMOVE', 'ADD', 'UPDATE'),
+    entity_Id  int
+);
+
+create table IF NOT EXISTS DIRECTORS
+(
+    DIRECTOR_ID INTEGER auto_increment,
+    NAME        CHARACTER VARYING,
+    constraint DIRECTORS_PK
+        primary key (DIRECTOR_ID)
+
+);
+
 merge into mpa key (mpa_id)
     values (1, 'G'),
            (2, 'PG'),
@@ -83,5 +101,34 @@ merge into GENRES key (GENRE_ID)
            (3, 'Мультфильм'),
            (4, 'Ужасы'),
            (5, 'Триллер'),
-           (6, 'Детектив')
+           (6, 'Детектив');
 
+CREATE TABLE IF NOT EXISTS REVIEWS
+(
+    REVIEW_ID   INTEGER AUTO_INCREMENT PRIMARY KEY,
+    CONTENT     VARCHAR(255),
+    IS_POSITIVE BOOLEAN,
+    USER_ID     INTEGER,
+    FILM_ID     INTEGER,
+    USEFUL      INTEGER,
+    constraint REVIEWS_USERS_ID_FK
+        foreign key (USER_ID) references USERS
+            on delete cascade,
+    constraint REVIEWS_FILMS_ID_FK
+        foreign key (FILM_ID) references FILMS
+            on delete cascade
+);
+
+CREATE TABLE IF NOT EXISTS REVIEWS_USEFUL
+(
+    USEFUL_ID INTEGER AUTO_INCREMENT PRIMARY KEY,
+    REVIEW_ID INTEGER,
+    USER_ID   INTEGER,
+    USEFUL    INTEGER,
+    constraint REVIEWS_USEFUL_REVIEWS_ID_FK
+        foreign key (REVIEW_ID) references REVIEWS
+            on delete cascade,
+    constraint REVIEWS_USEFUL_USER_ID_FK
+        foreign key (USER_ID) references USERS
+            on delete cascade
+);

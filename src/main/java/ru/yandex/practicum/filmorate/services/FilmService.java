@@ -3,13 +3,14 @@ package ru.yandex.practicum.filmorate.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.MpaDbStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -21,29 +22,34 @@ public class FilmService {
     private final UserStorage userStorage;
     private final GenreDbStorage genreStorage;
     private final MpaDbStorage mpaStorage;
-
+    private final DirectorDbStorage directorStorage;
     private final UserService userService;
 
     @Autowired
     public FilmService(FilmStorage storage, UserStorage userStorage, GenreDbStorage genreDbStorage,
-                       MpaDbStorage mpaDbStorage, UserService userService) {
+                       MpaDbStorage mpaDbStorage, UserService userService,
+                       DirectorDbStorage directorDbStorage) {
+
         this.storage = storage;
         this.userStorage = userStorage;
         this.genreStorage = genreDbStorage;
         this.mpaStorage = mpaDbStorage;
         this.userService = userService;
+        this.directorStorage = directorDbStorage;
     }
 
     public Collection<Film> getFilms() {
         return storage.getFilms();
     }
 
-    public void addFilm(Film film) {
-        storage.add(film);
+    public void addFilm(FilmDTO filmDTO) {
+        checkDirectorId(filmDTO);
+        storage.add(filmDTO);
     }
 
-    public void putFilm(Film film) {
-        storage.put(film);
+    public void putFilm(FilmDTO filmDTO) {
+        checkDirectorId(filmDTO);
+        storage.put(filmDTO);
     }
 
     public Film getFilm(int id) {
@@ -67,8 +73,19 @@ public class FilmService {
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 
-    public Collection<Film> getPopularFilms(int count) {
-        return storage.getPopularFilms(count);
+    public Collection<Film> getDirectorFilms(int directorId, String sort) {
+        if (!directorStorage.isContains(directorId)) {
+            throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
+        }
+        if (!sort.equals("like") && !sort.equals("year")) {
+            throw new UnsupportedOperationException(String.format("Sort by %s is not supported", sort));
+        }
+        return storage.getDirectorFilms(directorId, sort);
+    }
+
+    public Collection<Film> getPopularFilms(int count, int genreId, int year) {
+        return storage.getPopularFilms(count, genreId, year);
+
     }
 
     public MPA getMpaByFilmId(int filmId) {
@@ -87,6 +104,39 @@ public class FilmService {
         return genreStorage.getAllGenres();
     }
 
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+        if (query == null && by == null) {
+            return storage.getSortedFilms();
+        } else if (query == null || query.isEmpty()) {
+            throw new UnsupportedOperationException("Query must be specified");
+        } else if (by == null || by.isEmpty()) {
+            throw new UnsupportedOperationException("Parameters must be specified");
+        } else {
+            String[] params = handleParamBy(by);
+            if (params.length == 1) {
+                return storage.getFilmsBySearch(query, params[0]);
+            } else {
+                List<Film> films = new ArrayList<>();
+                for (String param : params) {
+                    films.addAll(storage.getFilmsBySearch(query, param));
+                }
+                return films;
+            }
+        }
+    }
+
+    private String[] handleParamBy(String by) {
+        String[] params = by.split(",");
+        if (params.length > 2) {
+            throw new UnsupportedOperationException("Too much parameters for query");
+        }
+        for (String param : params) {
+            if (!param.equals("title") && !param.equals("director")) {
+                throw new UnsupportedOperationException("Unsupported parameter - " + params[0]);
+            }
+        }
+        return params;
+    }
 
     private void checkIds(int filmId, int userId) {
         if (!storage.isContains(filmId)) {
@@ -98,16 +148,16 @@ public class FilmService {
     }
 
     public Collection<Film> getCommonFilms(int userId, int friendId) {
-        if (userId == friendId) {
-            throw new SameIdException("Same id");
-        }
-        if (!userStorage.isContains(userId)) {
-            throw new ModelNotFoundException(String.format("User id: %s not found", userId));
-        }
-        if (!userStorage.isContains(friendId)) {
-            throw new ModelNotFoundException(String.format("User id: %s not found", friendId));
-        }
+        userService.checkIds(userId, friendId);
         return storage.getCommonFilms(userId, friendId);
+    }
+
+
+    private void checkDirectorId(FilmDTO filmDTO) {
+        int directorId = filmDTO.getDirector().get(0).getId();
+        if (!directorStorage.isContains(directorId)) {
+            throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
+        }
     }
 
 }
