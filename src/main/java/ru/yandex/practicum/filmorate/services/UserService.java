@@ -83,7 +83,7 @@ public class UserService {
         return userFeed;
     }
 
-    private void checkIds(int userId, int friendId) {
+    public void checkIds(int userId, int friendId) {
         if (userId == friendId) {
             throw new SameIdException("Same id");
         }
