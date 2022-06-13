@@ -4,13 +4,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Service
 public class UserService {
@@ -69,18 +67,12 @@ public class UserService {
         return storage.getCommonFriends(id1, id2);
     }
 
-    public Set<Event> getUserFeed(Integer userId) {
-        Collection<User> userFriends = storage.getUserFriends(userId);
-        Set<Event> userFeed = new TreeSet<>((e1, e2) -> {
-            if (e1.getTimestamp().isBefore(e2.getTimestamp())) return 1;
-            if (e1.getTimestamp().equals(e2.getTimestamp())) return 0;
-            return -1;
-        });
-        for (User u : userFriends) {
-            Collection<Event> events = storage.getUserEvents(u.getId());
-            userFeed.addAll(events);
+    public Collection<Event> getUserFeed(Integer userId) {
+        if (storage.isContains(userId)) {
+            return storage.getUserEvents(userId);
+        } else {
+            throw new ModelNotFoundException(String.format("User id: %s not found", userId));
         }
-        return userFeed;
     }
 
     public void checkIds(int userId, int friendId) {

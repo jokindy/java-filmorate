@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.NoFriendsException;
-import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.EventType;
-import ru.yandex.practicum.filmorate.model.Operations;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.model.event.EventType;
+import ru.yandex.practicum.filmorate.model.event.Operations;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -130,14 +130,14 @@ public class UserDbStorage implements UserStorage {
         if (isExistLeft) {
             jdbcTemplate.update(
                     "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                            "VALUES (now(), ?, 'FRIEND', 'REMOVE', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))",
-                    id, id, friendId);
+                            "VALUES (now(), ?, 'FRIEND', 'REMOVE'," +
+                            " (select FRIEND_ID from FRIENDS where USER1_ID = ? and USER2_ID = ?))", id, id, friendId);
             jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ? and user2_id = ?", id, friendId);
         } else if (isExistRight) {
             jdbcTemplate.update(
                     "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                            "VALUES (now(), ?, 'FRIEND', 'REMOVE', (select FRIEND_ID from FRIENDS where USER1_ID=? and USER2_ID=?))",
-                    friendId, friendId, id);
+                            "VALUES (now(), ?, 'FRIEND', 'REMOVE', " +
+                            "(select FRIEND_ID from FRIENDS where USER1_ID = ? and USER2_ID= ? ))", friendId, friendId, id);
             jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ? and user2_id = ?", friendId, id);
         } else {
             throw new NoFriendsException(String.format("User id: %s don't have invitation" +
@@ -152,8 +152,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<Event> getUserEvents(Integer id) {
-        //language=H2
-        String sql = "select * from EVENTS where USER_ID=?";
+        String sql = "select * from EVENTS where USER_ID = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeEvent(rs), id);
     }
 
@@ -179,7 +178,7 @@ public class UserDbStorage implements UserStorage {
                 .eventId(rs.getInt("event_id"))
                 .timestamp(rs.getTimestamp("timestamp").toInstant())
                 .userId(rs.getInt("user_id"))
-                .eventType(EventType.valueOf(rs.getString("eventType")))
+                .eventType(EventType.valueOf(rs.getString("event_type")))
                 .operation(Operations.valueOf(rs.getString("operation")))
                 .entityId(rs.getInt("entity_id"))
                 .build();
@@ -187,10 +186,10 @@ public class UserDbStorage implements UserStorage {
 
     private void addFriendshipUpdateToEvents(int id1, int id2) {
         Integer friendshipId = jdbcTemplate.queryForObject(
-                "SELECT FRIEND_ID FROM FRIENDS WHERE USER1_ID=? and USER2_ID=?", Integer.class, id1, id2
+                "SELECT FRIEND_ID FROM FRIENDS WHERE USER1_ID = ? and USER2_ID = ?", Integer.class, id1, id2
         );
         String eventRequestSql = "SELECT * FROM EVENTS " +
-                "WHERE USER_ID=? and EVENT_TYPE='FRIEND' and OPERATION='UPDATE' and ENTITY_ID=?";
+                "WHERE USER_ID=? and EVENT_TYPE = 'FRIEND' and OPERATION = 'UPDATE' and ENTITY_ID = ?";
         try {
             jdbcTemplate.queryForObject(eventRequestSql, (rs, rowNum) -> makeEvent(rs), id1, friendshipId);
             throw new ModelAlreadyExistException("Friendship already confirmed!");

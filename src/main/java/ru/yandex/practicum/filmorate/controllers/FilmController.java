@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmDTO;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.FilmDTO;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MPA;
 import ru.yandex.practicum.filmorate.services.FilmService;
 
 import javax.validation.Valid;
@@ -114,8 +114,8 @@ public class FilmController {
         return filmService.getAllGenres();
     }
 
-    @GetMapping("films/common/userId={userId}&friendId={friendId}")
-    public Collection<Film> commonFilms(@PathVariable("userId") int userId, @PathVariable("friendId") int friendId) {
+    @GetMapping("/films/common")
+    public Collection<Film> commonFilms(@RequestParam int userId, @RequestParam int friendId) {
         log.info("Found shared movies for users with id: {}, {}", userId, friendId);
         return filmService.getCommonFilms(userId, friendId);
     }

@@ -17,7 +17,7 @@ import java.util.Collection;
 @Validated
 @RestController
 @RequestMapping("/reviews")
-public class ReviewsController {
+public class ReviewController {
 
     private final ReviewService reviewService;
 

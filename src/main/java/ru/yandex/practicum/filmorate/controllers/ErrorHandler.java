@@ -66,6 +66,13 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleNumberFormatException(final NumberFormatException e) {
+        log.warn(e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleUnsupportedOperationException(final UnsupportedOperationException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());

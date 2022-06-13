@@ -7,8 +7,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.film.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -121,27 +121,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getFilmsBySearch(String query, String by) {
-        query = query.toLowerCase(Locale.ROOT);
+        query = "%" + query + "%";
         List<Film> films = new ArrayList<>();
         if ("title".equals(by)) {
-            List<String> names = jdbcTemplate.queryForList("SELECT name FROM films", String.class);
-            for (String name : names) {
-                String filmName = name.toLowerCase(Locale.ROOT);
-                if (filmName.contains(query)) {
-                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE name = ?", this::mapRowToFilm,
-                            name);
-                    films.add(film);
-                }
-            }
+            return jdbcTemplate.query("SELECT * FROM films WHERE name LIKE ?", this::mapRowToFilm, query);
         } else {
-            List<Director> directors = jdbcTemplate.query("SELECT * FROM directors", this::mapRowToDirector);
+            List<Director> directors = jdbcTemplate.query("SELECT * FROM directors WHERE name LIKE ?",
+                    this::mapRowToDirector, query);
             for (Director director : directors) {
-                String directorName = director.getName().toLowerCase(Locale.ROOT);
-                if (directorName.contains(query)) {
-                    Film film = jdbcTemplate.queryForObject("SELECT * FROM films WHERE director_id = ?",
-                            this::mapRowToFilm, director.getId());
-                    films.add(film);
-                }
+                films.addAll(jdbcTemplate.query("SELECT * FROM films WHERE director_id = ?",
+                        this::mapRowToFilm, director.getId()));
             }
         }
         return films;
@@ -202,10 +191,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getCommonFilms(int userId, int friendId) {
-        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE, f.MPA_ID" +
-                        " FROM USER_LIKES AS UL LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID WHERE USER_ID = ? AND UL.film_id" +
-                        " IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?) ORDER BY f.RATE DESC;", this::mapRowToFilm,
-                userId, friendId);
+        return jdbcTemplate.query("SELECT f.FILM_ID,f.name,f.DESCRIPTION,f.RELEASE_DATE,f.DURATION,f.RATE," +
+                        " f.MPA_ID,f.DIRECTOR_ID FROM USER_LIKES AS UL LEFT JOIN FILMS AS F ON F.FILM_ID = UL.FILM_ID" +
+                        " WHERE USER_ID = ? AND UL.film_id" +
+                        " IN (SELECT FILM_ID FROM USER_LIKES WHERE USER_ID = ?) ORDER BY f.RATE DESC;",
+                this::mapRowToFilm, userId, friendId);
     }
 
     private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {

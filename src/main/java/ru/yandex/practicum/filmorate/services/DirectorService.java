@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.services;
 
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.film.Director;
 import ru.yandex.practicum.filmorate.storage.film.DirectorDbStorage;
 
 import java.util.Collection;
