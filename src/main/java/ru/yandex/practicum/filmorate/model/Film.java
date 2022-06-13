@@ -65,25 +65,6 @@ public class Film {
         }
     }
 
-    public void putUserLike(int userId) {
-        if (userLikes.contains(userId)) {
-            throw new ModelAlreadyExistException("Film already liked by user");
-        }
-        userLikes.add(userId);
-    }
-
-    @JsonIgnore
-    public int getUserLikesCount() {
-        return userLikes.size();
-    }
-
-    public void deleteUserLike(int userId) {
-        if (!userLikes.contains(userId)) {
-            throw new ModelNotFoundException("Nothing to delete");
-        }
-        userLikes.remove(userId);
-    }
-
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);

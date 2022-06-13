@@ -38,11 +38,6 @@ public class FilmService {
     }
 
     public String deleteFilm(int id) {
-        Film film = storage.getFilmById(id);
-        Set<Integer> userLikes = new HashSet<>(film.getUserLikes());
-        for (Integer userLike : userLikes) {
-            userStorage.getUserById(userLike).deleteLike(id);
-        }
         storage.deleteFilmById(id);
         return "Film id: " + id + " deleted";
     }

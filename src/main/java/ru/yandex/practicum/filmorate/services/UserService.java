@@ -19,7 +19,7 @@ public class UserService {
     private final FilmStorage filmStorage;
 
     public UserService(@Qualifier("UserDbStorage") UserStorage storage,
-                       @Qualifier("InMemoryFilmStorage") FilmStorage filmStorage) {
+                       @Qualifier("FilmDbStorage") FilmStorage filmStorage) {
         this.storage = storage;
         this.filmStorage = filmStorage;
     }

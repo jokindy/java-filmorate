@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
@@ -53,34 +51,6 @@ public class User {
         this.friendsId = new HashSet<>();
         this.likedFilmsId = new HashSet<>();
         validate();
-    }
-
-    public void addUserToFriend(int friendId) {
-        if (friendsId.contains(friendId)) {
-            throw new ModelAlreadyExistException("Users are already friends");
-        }
-        friendsId.add(friendId);
-    }
-
-    public void deleteUserFromFriend(int friendId) {
-        if (!friendsId.contains(friendId)) {
-            throw new ModelNotFoundException("Nothing to delete");
-        }
-        friendsId.remove(friendId);
-    }
-
-    public void addLike(int filmId) {
-        if (likedFilmsId.contains(filmId)) {
-            throw new ModelAlreadyExistException("Film already liked by user");
-        }
-        likedFilmsId.add(filmId);
-    }
-
-    public void deleteLike(int filmId) {
-        if (!likedFilmsId.contains(filmId)) {
-            throw new ModelNotFoundException("Nothing to delete");
-        }
-        likedFilmsId.remove(filmId);
     }
 
     public Map<String, Object> toMap() {
