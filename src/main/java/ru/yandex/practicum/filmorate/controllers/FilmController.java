@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmDTO;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.services.FilmService;
@@ -30,14 +31,14 @@ public class FilmController {
     }
 
     @PostMapping("/films")
-    public Film add(@Valid @RequestBody Film film) {
+    public FilmDTO add(@Valid @RequestBody FilmDTO film) {
         log.info("Add film");
         filmService.addFilm(film);
         return film;
     }
 
     @PutMapping("/films")
-    public Film update(@Valid @RequestBody Film film) {
+    public FilmDTO update(@Valid @RequestBody FilmDTO film) {
         log.info("Put film");
         filmService.putFilm(film);
         return film;
@@ -81,6 +82,12 @@ public class FilmController {
                                           @RequestParam(required = false) String by) {
         log.info("Get films by searching");
         return filmService.getFilmsBySearch(query, by);
+    }
+
+    @GetMapping("/films/director/{directorId}")
+    public Collection<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        log.info("Get films by director id: {} by {}", directorId, sortBy);
+        return filmService.getDirectorFilms(directorId, sortBy);
     }
 
     @GetMapping("/mpa/{filmId}")
