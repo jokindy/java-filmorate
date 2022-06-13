@@ -70,9 +70,18 @@ public class FilmController {
 
     @GetMapping("/films/popular")
     public Collection<Film> getPopularFilms(@RequestParam(required = false, defaultValue = "10")
-                                            @Positive(message = "Count must be positive") int count) {
+                                            @Positive(message = "Count must be positive") int count,
+                                            @RequestParam(required = false, defaultValue = "0") int genreId,
+                                            @RequestParam(required = false, defaultValue = "0") int year) {
         log.info("Get {} popular films", count);
-        return filmService.getPopularFilms(count);
+        return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/search")
+    public Collection<Film> getFoundFilms(@RequestParam(required = false) String query,
+                                          @RequestParam(required = false) String by) {
+        log.info("Get films by searching");
+        return filmService.getFilmsBySearch(query, by);
     }
 
     @GetMapping("/films/director/{directorId}")

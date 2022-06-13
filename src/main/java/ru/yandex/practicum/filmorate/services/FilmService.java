@@ -73,8 +73,9 @@ public class FilmService {
         return storage.getDirectorFilms(directorId, sort);
     }
 
-    public Collection<Film> getPopularFilms(int count) {
-        return storage.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(int count, int genreId, int year) {
+        return storage.getPopularFilms(count, genreId, year);
+
     }
 
     public MPA getMpaByFilmId(int filmId) {
@@ -93,6 +94,39 @@ public class FilmService {
         return genreStorage.getAllGenres();
     }
 
+    public Collection<Film> getFilmsBySearch(String query, String by) {
+        if (query == null && by == null) {
+            return storage.getSortedFilms();
+        } else if (query == null || query.isEmpty()) {
+            throw new UnsupportedOperationException("Query must be specified");
+        } else if (by == null || by.isEmpty()) {
+            throw new UnsupportedOperationException("Parameters must be specified");
+        } else {
+            String[] params = handleParamBy(by);
+            if (params.length == 1) {
+                return storage.getFilmsBySearch(query, params[0]);
+            } else {
+                List<Film> films = new ArrayList<>();
+                for (String param : params) {
+                    films.addAll(storage.getFilmsBySearch(query, param));
+                }
+                return films;
+            }
+        }
+    }
+
+    private String[] handleParamBy(String by) {
+        String[] params = by.split(",");
+        if (params.length > 2) {
+            throw new UnsupportedOperationException("Too much parameters for query");
+        }
+        for (String param : params) {
+            if (!param.equals("title") && !param.equals("director")) {
+                throw new UnsupportedOperationException("Unsupported parameter - " + params[0]);
+            }
+        }
+        return params;
+    }
 
     private void checkIds(int filmId, int userId) {
         if (!storage.isContains(filmId)) {
