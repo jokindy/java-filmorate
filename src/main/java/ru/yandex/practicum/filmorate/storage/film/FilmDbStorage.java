@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -81,11 +82,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteFilmById(int id) {
-        try {
-            jdbcTemplate.update("DELETE FROM films WHERE film_id = ?", id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ModelNotFoundException(String.format("User id: %s not found", id));
-        }
+        getFilmById(id);
+        jdbcTemplate.update("DELETE FROM films WHERE film_id = ?", id);
     }
 
     @Override
@@ -131,15 +129,40 @@ public class FilmDbStorage implements FilmStorage {
         }
         return films;
     }
-
-    @Override
-    public Collection<Film> getSortedFilms() {
-        return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC", this::mapRowToFilm);
-    }
-
-    @Override
+  
+  @Override
     public Collection<Film> getPopularFilms(int count) {
         return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC LIMIT ?", this::mapRowToFilm, count);
+  
+  
+  @Override
+    public Collection<Film> getPopularFilms(int count, int genreId, int year) {
+        if (genreId < 0 || year < 0) {
+            throw new ValidationException("Cannot be negative");
+        }
+            if (genreId == 0 && year == 0) {
+                return jdbcTemplate.query("SELECT * FROM films ORDER BY rate DESC LIMIT ?", this::mapRowToFilm, count);
+            } else if (year == 0) {
+                return jdbcTemplate.query("SELECT *" +
+                        "FROM films " +
+                        "INNER JOIN FILM_GENRES ON FILMS.FILM_ID = FILM_GENRES.FILM_ID " +
+                        "WHERE FILM_GENRES.GENRE_ID = ?" +
+                        "ORDER BY FILMS.RATE DESC " +
+                        "LIMIT ?", this::mapRowToFilm, genreId, count);
+            } else if (genreId == 0) {
+                return jdbcTemplate.query("select * " +
+                        "from FILMS " +
+                        "where extract(year from RELEASE_DATE) = ? " +
+                        "order by RATE desc " +
+                        "limit ?", this::mapRowToFilm, year, count);
+            } else {
+                return jdbcTemplate.query("select * " +
+                        "from FILMS " +
+                        "inner join FILM_GENRES on FILMS.FILM_ID = FILM_GENRES.FILM_ID " +
+                        "where FILM_GENRES.GENRE_ID = ? and extract(year from FILMS.RELEASE_DATE) = ? " +
+                        "order by FILMS.RATE desc " +
+                        "limit ?", this::mapRowToFilm, genreId, year, count);
+            }
     }
 
     @Override

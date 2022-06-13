@@ -7,10 +7,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.exceptions.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.TestFilms.*;
@@ -80,7 +83,19 @@ public class FilmStorageTests {
         filmStorage.add(commonFilm2);
         filmStorage.add(commonFilm3);
         Collection<Film> popularFilms = List.of(commonFilm2, commonFilm3, updatedFilm1);
-        Assertions.assertEquals(popularFilms, filmStorage.getPopularFilms(3));
+        Assertions.assertEquals(popularFilms, filmStorage.getPopularFilms(3, 0, 0));
+    }
+
+    @Order(10)
+    @Test
+    public void testGetPopularFilmWithYearAndGenre() {
+        LinkedHashSet<Genre> genre = new LinkedHashSet<>(Arrays.asList(new Genre(1)));
+        commonFilm1.setGenres(genre);
+        filmStorage.add(commonFilm1);
+        filmStorage.add(commonFilm2);
+        filmStorage.add(commonFilm3);
+        Collection<Film> popularFilms = List.of(commonFilm1);
+        Assertions.assertEquals(popularFilms, filmStorage.getPopularFilms(3, 1, 2022));
     }
 
     @Order(8)

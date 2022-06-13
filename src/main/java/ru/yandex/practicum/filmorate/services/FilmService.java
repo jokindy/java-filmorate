@@ -63,8 +63,8 @@ public class FilmService {
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 
-    public Collection<Film> getPopularFilms(int count) {
-        return storage.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(int count, int genreId, int year) {
+        return storage.getPopularFilms(count, genreId, year);
     }
 
     public MPA getMpaByFilmId(int filmId) {
