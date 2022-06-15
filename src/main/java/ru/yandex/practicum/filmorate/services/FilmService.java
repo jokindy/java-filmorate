@@ -142,10 +142,11 @@ public class FilmService {
 
 
     private void checkDirectorId(FilmDTO filmDTO) {
-        int directorId = filmDTO.getDirector().get(0).getId();
-        if (!directorStorage.isContains(directorId)) {
-            throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
+        if (filmDTO.getDirector() != null) {
+            int directorId = filmDTO.getDirector().get(0).getId();
+            if (!directorStorage.isContains(directorId)) {
+                throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
+            }
         }
     }
-
 }

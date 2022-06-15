@@ -41,7 +41,11 @@ public class Film {
         this.rate = filmDTO.getRate();
         this.mpa = filmDTO.getMpa();
         this.genres = filmDTO.getGenres();
-        this.director = filmDTO.getDirector().get(0); // согласно ТЗ один режиссер, поэтому берем из списка первого
+        if (filmDTO.getDirector() != null) {
+            this.director = filmDTO.getDirector().get(0);    // согласно ТЗ один режиссер, поэтому берем из списка первого
+        } else {
+            this.director = new Director(0);
+        }
     }
 
     public Map<String, Object> toMap() {

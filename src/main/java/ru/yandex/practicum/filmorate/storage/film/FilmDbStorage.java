@@ -27,7 +27,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(FilmDTO filmDTO) {
         Film film = new Film(filmDTO);
-        int directorId = film.getDirector().getId();
         Collection<Film> films = getFilms();
         if (!films.contains(film)) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -208,8 +207,13 @@ public class FilmDbStorage implements FilmStorage {
         int mpaId = filmRows.getInt("mpa_id");
         MPA mpa = new MPA(mpaId);
         int directorId = filmRows.getInt("director_id");
-        Director director = jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?",
-                this::mapRowToDirector, directorId);
+        Director director;
+        if (directorId != 0) {
+            director = jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?",
+                    this::mapRowToDirector, directorId);
+        } else {
+            director = new Director(directorId);
+        }
         Film film = new Film(name, description, releaseDate, duration, rate, mpa, director);
         film.setId(id);
         List<Genre> genres = jdbcTemplate.query("SELECT * FROM film_genres WHERE film_id = ?",
