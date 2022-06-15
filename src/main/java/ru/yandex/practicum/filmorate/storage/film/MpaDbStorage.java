@@ -31,7 +31,9 @@ public class MpaDbStorage {
         }
     }
 
-    private MPA mapRowToMpa(ResultSet genreRows, int rowNum) throws SQLException {
-        return new MPA(genreRows.getInt("mpa_id"));
+    private MPA mapRowToMpa(ResultSet mpaRows, int rowNum) throws SQLException {
+        int mpaId = mpaRows.getInt("mpa_id");
+        MPA.MPAName name = MPA.MPAName.valueOf(mpaRows.getString("name"));
+        return new MPA(mpaId, name);
     }
 }

@@ -6,8 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 @Data
 @EqualsAndHashCode
@@ -43,13 +42,17 @@ public class FilmDTO {
 
     private List<Director> director;
 
-    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
+    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa,
+                   List<Director> director) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.rate = rate;
         this.mpa = mpa;
+        if (director == null || director.isEmpty()) {
+            this.director = List.of(new Director(null));
+        }
         validate();
     }
 

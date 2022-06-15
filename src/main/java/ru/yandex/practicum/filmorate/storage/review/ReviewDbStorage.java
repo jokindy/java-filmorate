@@ -22,7 +22,7 @@ public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbc;
 
     @Override
-    public Review addReview(Review review) {
+    public void addReview(Review review) {
         Collection<Review> reviews = getReviews();
         if (!reviews.contains(review)) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
@@ -33,7 +33,6 @@ public class ReviewDbStorage implements ReviewStorage {
             review.setReviewId(reviewId);
             jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                     "VALUES (now(), ?, 'REVIEW', 'ADD', ?)", review.getUserId(), review.getReviewId());
-            return review;
         } else {
             throw new ModelAlreadyExistException("This review is already added");
         }
@@ -44,7 +43,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Review putReview(Review review) {
+    public void putReview(Review review) {
         int reviewId = review.getReviewId();
         Review reviewInDb = getReviewById(reviewId);
         if (review.equals(reviewInDb)) {
@@ -57,7 +56,6 @@ public class ReviewDbStorage implements ReviewStorage {
         review.setUseful(usefulByReviewId);
         jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
                 "VALUES (now(), ?, 'REVIEW', 'UPDATE', ?)", review.getUserId(), review.getReviewId());
-        return review;
     }
 
     private Integer getUsefulByReviewId(int reviewId) {
@@ -94,14 +92,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void putUseful(int reviewId, int userId, int useful) {
-        Integer usefulInDb = null;
-        try {
-            usefulInDb = jdbc.queryForObject(
-                    "SELECT useful FROM reviews_useful WHERE review_id = ? AND user_id = ?",
-                    Integer.class, reviewId, userId);
-        } catch (EmptyResultDataAccessException e) {
-            //ignored
-        }
+        Integer usefulInDb = jdbc.queryForObject("SELECT useful FROM reviews_useful WHERE review_id = ? " +
+                "AND user_id = ?", Integer.class, reviewId, userId);
         if (usefulInDb != null) {
             if (usefulInDb == useful) {
                 throw new ModelAlreadyExistException(String.format("Useful: %s already set by this user", useful));
@@ -110,7 +102,6 @@ public class ReviewDbStorage implements ReviewStorage {
                         useful, reviewId, userId);
                 jdbc.update("UPDATE reviews SET useful = useful + ? WHERE review_id = ?",
                         useful * 2, reviewId);
-
             }
         } else {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)

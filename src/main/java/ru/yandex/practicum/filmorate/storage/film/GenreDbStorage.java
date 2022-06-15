@@ -32,6 +32,8 @@ public class GenreDbStorage {
     }
 
     private Genre mapRowToGenre(ResultSet genreRows, int rowNum) throws SQLException {
-        return new Genre(genreRows.getInt("genre_id"));
+        int genreId = genreRows.getInt("genre_id");
+        Genre.GenreName genreName = Genre.GenreName.getEnum(genreRows.getString("name"));
+        return new Genre(genreId, genreName);
     }
 }

@@ -1,22 +1,28 @@
+create table IF NOT EXISTS DIRECTORS
+(
+    DIRECTOR_ID INTEGER auto_increment primary key,
+    NAME        CHARACTER VARYING
+);
+
 create table IF NOT EXISTS FILMS
 (
-    FILM_ID      INTEGER auto_increment primary key,
+    FILM_ID      INTEGER UNIQUE auto_increment PRIMARY KEY,
     NAME         CHARACTER VARYING(100),
     DESCRIPTION  CHARACTER VARYING(200),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     RATE         INTEGER,
     MPA_ID       INTEGER,
-    DIRECTOR_ID  INTEGER
+    DIRECTOR_ID  INTEGER,
+    FOREIGN KEY (DIRECTOR_ID) REFERENCES DIRECTORS on delete set null
 );
 
 create table IF NOT EXISTS FILM_GENRES
 (
-    FILM_ID  INTEGER,
+    FILM_ID  INTEGER not null,
     GENRE_ID INTEGER not null,
-    constraint FILM_ID
-        foreign key (FILM_ID) references FILMS
-            on delete cascade
+        foreign key (FILM_ID) references FILMS (FILM_ID)
+            on update cascade on delete cascade
 );
 
 create table IF NOT EXISTS GENRES
@@ -79,7 +85,7 @@ CREATE TABLE IF NOT EXISTS USER_LIKES
         foreign key (LIKE_ID) references EVENTS
             on update cascade on delete cascade,
     constraint USER_LIKES_FILMS_FILM_ID_FK
-        foreign key (FILM_ID) references FILMS
+        foreign key (FILM_ID) references FILMS (FILM_ID)
             on update cascade on delete cascade,
     constraint USER_LIKES_USERS_USER_ID_FK
         foreign key (USER_ID) references USERS
@@ -88,11 +94,9 @@ CREATE TABLE IF NOT EXISTS USER_LIKES
 
 create table IF NOT EXISTS DIRECTORS
 (
-    DIRECTOR_ID INTEGER auto_increment,
-    NAME        CHARACTER VARYING,
-    constraint DIRECTORS_PK
-        primary key (DIRECTOR_ID)
-
+    DIRECTOR_ID INTEGER auto_increment
+        primary key,
+    NAME        CHARACTER VARYING
 );
 
 CREATE TABLE IF NOT EXISTS REVIEWS
@@ -107,7 +111,7 @@ CREATE TABLE IF NOT EXISTS REVIEWS
         foreign key (USER_ID) references USERS
             on delete cascade,
     constraint REVIEWS_FILMS_ID_FK
-        foreign key (FILM_ID) references FILMS
+        foreign key (FILM_ID) references FILMS (FILM_ID)
             on delete cascade
 );
 
@@ -128,9 +132,9 @@ CREATE TABLE IF NOT EXISTS REVIEWS_USEFUL
 merge into mpa key (mpa_id)
     values (1, 'G'),
            (2, 'PG'),
-           (3, 'PG-13'),
+           (3, 'PG_13'),
            (4, 'R'),
-           (5, 'NC-17');
+           (5, 'NC_17');
 merge into GENRES key (GENRE_ID)
     values (1, 'Комедия'),
            (2, 'Драма'),

@@ -1,15 +1,10 @@
 package ru.yandex.practicum.filmorate.services;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.film.Film;
-import ru.yandex.practicum.filmorate.model.film.Genre;
-import ru.yandex.practicum.filmorate.model.film.MPA;
-import ru.yandex.practicum.filmorate.model.film.FilmDTO;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.film.MpaDbStorage;
+import ru.yandex.practicum.filmorate.model.film.*;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -17,9 +12,10 @@ import java.util.*;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class FilmService {
 
-    private final FilmStorage storage;
+    private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final GenreDbStorage genreStorage;
     private final MpaDbStorage mpaStorage;
@@ -27,37 +23,37 @@ public class FilmService {
     private final UserService userService;
 
     public Collection<Film> getFilms() {
-        return storage.getFilms();
+        return filmStorage.getFilms();
     }
 
     public void addFilm(FilmDTO filmDTO) {
         checkDirectorId(filmDTO);
-        storage.add(filmDTO);
+        filmStorage.add(filmDTO);
     }
 
     public void putFilm(FilmDTO filmDTO) {
         checkDirectorId(filmDTO);
-        storage.put(filmDTO);
+        filmStorage.put(filmDTO);
     }
 
     public Film getFilm(int id) {
-        return storage.getFilmById(id);
+        return filmStorage.getFilmById(id);
     }
 
     public String deleteFilm(int id) {
-        storage.deleteFilmById(id);
+        filmStorage.deleteFilmById(id);
         return "Film id: " + id + " deleted";
     }
 
     public String putLike(int filmId, int userId) {
         checkIds(filmId, userId);
-        storage.putLike(filmId, userId);
+        filmStorage.putLike(filmId, userId);
         return String.format("User id: %s put like to film id: %s", userId, filmId);
     }
 
     public String deleteLike(int filmId, int userId) {
         checkIds(filmId, userId);
-        storage.deleteLike(filmId, userId);
+        filmStorage.deleteLike(filmId, userId);
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 
@@ -68,11 +64,11 @@ public class FilmService {
         if (!sort.equals("like") && !sort.equals("year")) {
             throw new UnsupportedOperationException(String.format("Sort by %s is not supported", sort));
         }
-        return storage.getDirectorFilms(directorId, sort);
+        return filmStorage.getDirectorFilms(directorId, sort);
     }
 
     public Collection<Film> getPopularFilms(int count, int genreId, int year) {
-        return storage.getPopularFilms(count, genreId, year);
+        return filmStorage.getPopularFilms(count, genreId, year);
 
     }
 
@@ -94,22 +90,20 @@ public class FilmService {
 
     public Collection<Film> getFilmsBySearch(String query, String by) {
         if (query == null && by == null) {
-            return storage.getSortedFilms();
+            log.info("Query and parameters not specified. Returning sorted films");
+            return filmStorage.getSortedFilms();
         } else if (query == null || query.isEmpty()) {
             throw new UnsupportedOperationException("Query must be specified");
         } else if (by == null || by.isEmpty()) {
             throw new UnsupportedOperationException("Parameters must be specified");
         } else {
             String[] params = handleParamBy(by);
-            if (params.length == 1) {
-                return storage.getFilmsBySearch(query, params[0]);
-            } else {
-                List<Film> films = new ArrayList<>();
-                for (String param : params) {
-                    films.addAll(storage.getFilmsBySearch(query, param));
-                }
-                return films;
+            List<Film> films = new ArrayList<>();
+            for (String param : params) {
+                films.addAll(filmStorage.getFilmsBySearch(query, param));
+                log.info("Searching films where query: {} in {}", query, param);
             }
+            return films;
         }
     }
 
@@ -127,7 +121,7 @@ public class FilmService {
     }
 
     private void checkIds(int filmId, int userId) {
-        if (!storage.isContains(filmId)) {
+        if (!filmStorage.isContains(filmId)) {
             throw new ModelNotFoundException(String.format("Film id: %s not found", filmId));
         }
         if (!userStorage.isContains(userId)) {
@@ -137,13 +131,12 @@ public class FilmService {
 
     public Collection<Film> getCommonFilms(int userId, int friendId) {
         userService.checkIds(userId, friendId);
-        return storage.getCommonFilms(userId, friendId);
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 
-
     private void checkDirectorId(FilmDTO filmDTO) {
-        if (filmDTO.getDirector() != null) {
-            int directorId = filmDTO.getDirector().get(0).getId();
+        Integer directorId = filmDTO.getDirector().get(0).getId();
+        if (directorId != null) {
             if (!directorStorage.isContains(directorId)) {
                 throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));
             }

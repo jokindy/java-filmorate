@@ -10,7 +10,7 @@ import java.util.Map;
 @EqualsAndHashCode
 public class Director {
 
-    private int id;
+    private Integer id;
 
     @EqualsAndHashCode.Exclude
     private String name;
@@ -20,7 +20,7 @@ public class Director {
         this.name = name;
     }
 
-    public Director(int id) {
+    public Director(Integer id) {
         this.id = id;
     }
 

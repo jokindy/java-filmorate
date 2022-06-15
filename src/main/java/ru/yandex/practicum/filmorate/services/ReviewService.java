@@ -18,20 +18,19 @@ public class ReviewService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
-    public Review addReview(Review review) {
+    public void addReview(Review review) {
         checkReviewIds(review);
-        return reviewStorage.addReview(review);
+        reviewStorage.addReview(review);
     }
 
-    public Review putReview(Review review) {
+    public void putReview(Review review) {
         checkReviewIds(review);
-        System.out.println("REVIEW ID - " + review.getReviewId());
-        return reviewStorage.putReview(review);
+        reviewStorage.putReview(review);
     }
 
     public String deleteReview(int reviewId) {
         reviewStorage.deleteReview(reviewId);
-        return String.format("Review with id: %d was deleted", reviewId);
+        return String.format("Review id: %d was deleted", reviewId);
     }
 
     public Review getReview(int reviewId) {

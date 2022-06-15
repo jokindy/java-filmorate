@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.services.ReviewService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @AllArgsConstructor
@@ -24,13 +23,15 @@ public class ReviewController {
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {
         log.info("Add review");
-        return reviewService.addReview(review);
+        reviewService.addReview(review);
+        return review;
     }
 
     @PutMapping
     public Review putReview(@Valid @RequestBody Review review) {
         log.info("Update review");
-        return reviewService.putReview(review);
+        reviewService.putReview(review);
+        return review;
     }
 
     @DeleteMapping("{reviewId}")
@@ -48,8 +49,7 @@ public class ReviewController {
     @GetMapping()
     public Collection<Review> getReviewsByFilmId(
             @Positive(message = "Count must be positive") @RequestParam(required = false, defaultValue = "10") int count,
-            @PositiveOrZero(message = "filmId must be positive") @RequestParam(required = false, defaultValue = "0") int filmId) {
-
+            @Positive(message = "filmId must be positive") @RequestParam(required = false, defaultValue = "0") int filmId) {
         log.info("Get reviews by filmId id: {}", filmId);
         return reviewService.getReviewsByFilmIdAndCount(filmId, count);
     }
@@ -58,7 +58,6 @@ public class ReviewController {
     public String putLikeToReview(
             @Positive(message = "Id must be positive") @PathVariable int reviewId,
             @Positive(message = "Id must be positive") @PathVariable int userId) {
-
         log.info("Put like to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.putLike(reviewId, userId);
     }
@@ -67,7 +66,6 @@ public class ReviewController {
     public String putDislikeToReview(
             @Positive(message = "Id must be positive") @PathVariable int reviewId,
             @Positive(message = "Id must be positive") @PathVariable int userId) {
-
         log.info("Put dislike to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.putDislike(reviewId, userId);
     }
@@ -76,7 +74,6 @@ public class ReviewController {
     public String deleteLikeToReview(
             @Positive(message = "Id must be positive") @PathVariable int reviewId,
             @Positive(message = "Id must be positive") @PathVariable int userId) {
-
         log.info("Delete like to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.deleteLike(reviewId, userId);
     }
@@ -85,7 +82,6 @@ public class ReviewController {
     public String deleteDislikeToReview(
             @Positive(message = "Id must be positive") @PathVariable int reviewId,
             @Positive(message = "Id must be positive") @PathVariable int userId) {
-
         log.info("Delete dislike to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.deleteDislike(reviewId, userId);
     }
