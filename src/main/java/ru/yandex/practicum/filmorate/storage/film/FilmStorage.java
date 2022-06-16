@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage.film;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.FilmDTO;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 public interface FilmStorage {
@@ -32,4 +34,6 @@ public interface FilmStorage {
     boolean isContains(int id);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
+
+    Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException;
 }

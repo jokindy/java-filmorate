@@ -5,6 +5,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.services.UserService;
 
 import javax.validation.Valid;
@@ -93,4 +94,10 @@ public class UserController {
     public Collection<Event> getUserFeed(@PathVariable @Positive(message = "User id must be positive") int id) {
         return userService.getUserFeed(id);
     }
+
+    @GetMapping("/users/{id}/recommendations")
+    public Collection<Film> getRecommendation(@PathVariable @Positive(message = "User id must be positive") int id){
+        return userService.getRecommendation(id);
+    }
+
 }

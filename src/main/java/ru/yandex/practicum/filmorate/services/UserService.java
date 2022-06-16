@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -85,5 +86,9 @@ public class UserService {
         if (!storage.isContains(friendId)) {
             throw new ModelNotFoundException(String.format("User id: %s not found", friendId));
         }
+    }
+
+    public Collection<Film> getRecommendation(int userId){
+        return storage.getRecommendationFilms(userId);
     }
 }

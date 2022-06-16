@@ -204,7 +204,8 @@ public class FilmDbStorage implements FilmStorage {
                 this::mapRowToFilm, userId, friendId);
     }
 
-    private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
+    @Override
+    public Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
         int id = filmRows.getInt("film_id");
         String name = filmRows.getString("name");
         String description = filmRows.getString("description");
