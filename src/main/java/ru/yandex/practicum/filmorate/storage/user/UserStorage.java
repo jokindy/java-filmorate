@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
@@ -25,6 +26,8 @@ public interface UserStorage {
     Collection<User> getCommonFriends(int id1, int id2);
 
     Collection<User> getUsers();
+
+    Collection<Event> getUserEvents(Integer userId);
 
     boolean isContains(int id);
 }

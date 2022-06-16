@@ -1,22 +1,16 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
-import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-@EqualsAndHashCode
 @Data
-public class Film {
+@EqualsAndHashCode
+public class FilmDTO {
 
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
@@ -41,21 +35,24 @@ public class Film {
 
     private int rate;
 
-    @JsonIgnore
-    private Set<Integer> userLikes;
-
     @NotNull
-    @EqualsAndHashCode.Exclude
     private MPA mpa;
 
-    public Film(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
+    private LinkedHashSet<Genre> genres;
+
+    private List<Director> director;
+
+    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa,
+                   List<Director> director) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.rate = rate;
         this.mpa = mpa;
-        this.userLikes = new HashSet<>();
+        if (director == null || director.isEmpty()) {
+            this.director = List.of(new Director(null));
+        }
         validate();
     }
 
@@ -63,16 +60,5 @@ public class Film {
         if (releaseDate.isBefore(CINEMA_BIRTHDAY)) {
             throw new ValidationException("Film can't be SO OLD!");
         }
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", name);
-        map.put("description", description);
-        map.put("release_date", releaseDate);
-        map.put("duration", duration);
-        map.put("rate", rate);
-        map.put("mpa", mpa.getId());
-        return map;
     }
 }

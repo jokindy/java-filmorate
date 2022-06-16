@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -8,9 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @EqualsAndHashCode
 @Data
@@ -33,12 +30,6 @@ public class User {
     @NotNull
     private LocalDate birthday;
 
-    @JsonIgnore
-    private Set<Integer> friendsId;
-
-    @JsonIgnore
-    private Set<Integer> likedFilmsId;
-
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
@@ -48,8 +39,6 @@ public class User {
             this.name = name;
         }
         this.birthday = birthday;
-        this.friendsId = new HashSet<>();
-        this.likedFilmsId = new HashSet<>();
         validate();
     }
 

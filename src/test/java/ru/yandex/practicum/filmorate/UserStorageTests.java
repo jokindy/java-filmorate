@@ -60,6 +60,7 @@ public class UserStorageTests {
         Assertions.assertEquals(List.of(commonUser2), userStorage.getUserFriends(1));
     }
 
+
     @Order(6)
     @Test
     public void testConfirmFriendInvitation() {
