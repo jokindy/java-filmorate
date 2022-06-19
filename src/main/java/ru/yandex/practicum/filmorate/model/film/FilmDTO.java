@@ -33,7 +33,7 @@ public class FilmDTO {
     @Positive(message = "Duration must be positive")
     private int duration;
 
-    private int rate;
+    private Double rate;
 
     @NotNull
     private MPA mpa;
@@ -42,7 +42,7 @@ public class FilmDTO {
 
     private List<Director> director;
 
-    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa,
+    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, Double rate, MPA mpa,
                    List<Director> director) {
         this.name = name;
         this.description = description;

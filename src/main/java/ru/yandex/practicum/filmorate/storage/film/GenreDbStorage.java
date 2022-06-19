@@ -9,6 +9,8 @@ import ru.yandex.practicum.filmorate.model.film.Genre;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Component
 public class GenreDbStorage {
@@ -35,5 +37,13 @@ public class GenreDbStorage {
         int genreId = genreRows.getInt("genre_id");
         Genre.GenreName genreName = Genre.GenreName.getEnum(genreRows.getString("name"));
         return new Genre(genreId, genreName);
+    }
+
+    public LinkedHashSet<Genre> getListOfGenres(int filmId) {
+        List<Genre> genres = jdbcTemplate.query("SELECT g.GENRE_ID AS genre_id, name FROM film_genres AS f " +
+                        "LEFT JOIN genres AS g ON f.GENRE_ID = g.GENRE_ID WHERE film_id = ?",
+                this::mapRowToGenre, filmId);
+        if (!genres.isEmpty()) return new LinkedHashSet<>(genres);
+        else return null;
     }
 }

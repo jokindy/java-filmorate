@@ -11,7 +11,7 @@ create table IF NOT EXISTS FILMS
     DESCRIPTION  CHARACTER VARYING(200),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
-    RATE         INTEGER,
+    RATE         NUMERIC(10, 2),
     MPA_ID       INTEGER,
     DIRECTOR_ID  INTEGER,
     FOREIGN KEY (DIRECTOR_ID) REFERENCES DIRECTORS on delete set null
@@ -21,8 +21,8 @@ create table IF NOT EXISTS FILM_GENRES
 (
     FILM_ID  INTEGER not null,
     GENRE_ID INTEGER not null,
-        foreign key (FILM_ID) references FILMS (FILM_ID)
-            on update cascade on delete cascade
+    foreign key (FILM_ID) references FILMS (FILM_ID)
+        on update cascade on delete cascade
 );
 
 create table IF NOT EXISTS GENRES
@@ -62,6 +62,21 @@ CREATE TABLE IF NOT EXISTS FRIENDS
             on delete cascade
 );
 
+CREATE TABLE IF NOT EXISTS USER_LIKES
+(
+    LIKE_ID INTEGER UNIQUE auto_increment,
+    FILM_ID INTEGER not null,
+    USER_ID INTEGER not null,
+    RATE    INTEGER,
+    primary key (LIKE_ID, FILM_ID, USER_ID),
+    constraint USER_LIKES_FILMS_FILM_ID_FK
+        foreign key (FILM_ID) references FILMS (FILM_ID)
+            on update cascade on delete cascade,
+    constraint USER_LIKES_USERS_USER_ID_FK
+        foreign key (USER_ID) references USERS
+            on update cascade on delete cascade
+);
+
 CREATE TABLE IF NOT EXISTS EVENTS
 (
     EVENT_ID   INTEGER auto_increment
@@ -72,25 +87,11 @@ CREATE TABLE IF NOT EXISTS EVENTS
             on update cascade on delete cascade,
     EVENT_TYPE ENUM ('LIKE', 'REVIEW', 'FRIEND'),
     OPERATION  ENUM ('REMOVE', 'ADD', 'UPDATE'),
-    ENTITY_ID  INTEGER
+    ENTITY_ID  INTEGER,
+    FOREIGN KEY (ENTITY_ID) REFERENCES USER_LIKES (LIKE_ID) on delete cascade
 );
 
-CREATE TABLE IF NOT EXISTS USER_LIKES
-(
-    LIKE_ID INTEGER auto_increment,
-    FILM_ID INTEGER not null,
-    USER_ID INTEGER not null,
-    primary key (LIKE_ID, FILM_ID, USER_ID),
-    constraint LIKE_ID
-        foreign key (LIKE_ID) references EVENTS
-            on update cascade on delete cascade,
-    constraint USER_LIKES_FILMS_FILM_ID_FK
-        foreign key (FILM_ID) references FILMS (FILM_ID)
-            on update cascade on delete cascade,
-    constraint USER_LIKES_USERS_USER_ID_FK
-        foreign key (USER_ID) references USERS
-            on update cascade on delete cascade
-);
+
 
 create table IF NOT EXISTS DIRECTORS
 (

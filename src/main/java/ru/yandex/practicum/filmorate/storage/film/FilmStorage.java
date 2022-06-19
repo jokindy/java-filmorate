@@ -21,7 +21,7 @@ public interface FilmStorage {
 
     void deleteFilmById(int id);
 
-    void putLike(int id, int userId);
+    void putRate(int id, int userId, int rate);
 
     void deleteLike(int id, int userId);
 

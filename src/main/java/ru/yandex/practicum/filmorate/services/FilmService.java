@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.*;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -45,10 +46,11 @@ public class FilmService {
         return "Film id: " + id + " deleted";
     }
 
-    public String putLike(int filmId, int userId) {
+    public String putRate(int filmId, int userId, int rate) {
         checkIds(filmId, userId);
-        filmStorage.putLike(filmId, userId);
-        return String.format("User id: %s put like to film id: %s", userId, filmId);
+        if (rate < 1 || rate > 10) throw new ValidationException("Not valid rate");
+        filmStorage.putRate(filmId, userId, rate);
+        return String.format("User id: %s put rate %s to film id: %s", userId, rate, filmId);
     }
 
     public String deleteLike(int filmId, int userId) {
@@ -69,7 +71,6 @@ public class FilmService {
 
     public Collection<Film> getPopularFilms(int count, int genreId, int year) {
         return filmStorage.getPopularFilms(count, genreId, year);
-
     }
 
     public MPA getMpaByFilmId(int filmId) {

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,18 +15,17 @@ import ru.yandex.practicum.filmorate.model.film.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
+@AllArgsConstructor
 @Component("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final MpaDbStorage mpaStorage;
+    private final GenreDbStorage genreStorage;
+    private final DirectorDbStorage directorStorage;
 
     @Override
     public void add(FilmDTO filmDTO) {
@@ -90,19 +90,17 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void putLike(int id, int userId) {
+    public void putRate(int id, int userId, int rate) {
         List<Integer> userLikes = jdbcTemplate.queryForList("SELECT user_id FROM user_likes WHERE film_id = ?",
                 Integer.class, id);
         if (userLikes.contains(userId)) {
-            throw new ModelAlreadyExistException("Film already liked by user");
+            throw new ModelAlreadyExistException("Film already rated by user");
         }
-        jdbcTemplate.update("INSERT INTO user_likes(film_id, user_id) VALUES (?, ?)", id, userId);
-        jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?",
-                (getFilmById(id).getRate() + 1), id);
-        jdbcTemplate.update(
-                "INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                        "VALUES (now(), ?, 'LIKE', 'ADD', (select LIKE_ID from USER_LIKES where FILM_ID=? and USER_ID=?))",
-                userId, id, userId);
+        jdbcTemplate.update("INSERT INTO user_likes(film_id, user_id, rate) VALUES (?, ?, ?)", id, userId, rate);
+        jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?", getRate(id), id);
+        jdbcTemplate.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
+                "VALUES (now(), ?, 'LIKE', 'ADD', " +
+                "(select LIKE_ID from USER_LIKES where FILM_ID = ? and USER_ID = ?))", userId, id, userId);
     }
 
     @Override
@@ -113,8 +111,8 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID)" +
                     "VALUES (now(), ?, 'LIKE', 'REMOVE', (select LIKE_ID from USER_LIKES " +
                     "where FILM_ID = ? and USER_ID = ?))", userId, id, userId);
+            jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?", getRate(id), id);
             jdbcTemplate.update("DELETE FROM user_likes WHERE film_id = ? AND user_id = ?", id, userId);
-            jdbcTemplate.update("UPDATE films SET rate = ? WHERE film_id = ?", (getFilmById(id).getRate() - 1), id);
         } else {
             throw new ModelNotFoundException("Nothing to delete");
         }
@@ -128,8 +126,7 @@ public class FilmDbStorage implements FilmStorage {
             return jdbcTemplate.query("SELECT * FROM films WHERE name LIKE ?", this::mapRowToFilm, query);
         } else {
             log.info("Get list of directors similar to query: {}", query);
-            List<Director> directors = jdbcTemplate.query("SELECT * FROM directors WHERE name LIKE ?",
-                    this::mapRowToDirector, query);
+            List<Director> directors = directorStorage.getDirectorsByQuery(query);
             for (Director director : directors) {
                 films.addAll(jdbcTemplate.query("SELECT * FROM films WHERE director_id = ?",
                         this::mapRowToFilm, director.getId()));
@@ -204,53 +201,31 @@ public class FilmDbStorage implements FilmStorage {
                 this::mapRowToFilm, userId, friendId);
     }
 
-    private Film mapRowToFilm(ResultSet filmRows, int rowNum) throws SQLException {
-        int id = filmRows.getInt("film_id");
-        String name = filmRows.getString("name");
-        String description = filmRows.getString("description");
-        LocalDate releaseDate = filmRows.getDate("release_date").toLocalDate();
-        int duration = filmRows.getInt("duration");
-        int rate = filmRows.getInt("rate");
-        int mpaId = filmRows.getInt("mpa_id");
-        MPA mpa = jdbcTemplate.queryForObject("SELECT m.MPA_ID AS mpa_id, m.name FROM films AS f " +
-                        "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID WHERE film_id = ?",
-                this::mapRowToMpa, id);
-        int directorId = filmRows.getInt("director_id");
-        Director director;
-        if (directorId != 0) {
-            director = jdbcTemplate.queryForObject("SELECT * FROM directors WHERE director_id = ?",
-                    this::mapRowToDirector, directorId);
-        } else {
-            director = new Director(null);
-        }
-        Film film = new Film(name, description, releaseDate, duration, rate, mpa, director);
+    private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
+        int id = rs.getInt("film_id");
+        Film film = Film.builder().
+                id(id).
+                name(rs.getString("name")).
+                description(rs.getString("description")).
+                releaseDate(rs.getDate("release_date").toLocalDate()).
+                duration(rs.getInt("duration")).
+                rate(getRate(id)).
+                build();
+        int mpaId = rs.getInt("mpa_id");
+        MPA mpa = mpaStorage.getMpaById(mpaId);
+        film.setMpa(mpa);
+        int directorId = rs.getInt("director_id");
+        Director director = directorStorage.getDirectorById(directorId, true);
         film.setId(id);
-        List<Genre> genres = jdbcTemplate.query("SELECT g.GENRE_ID AS genre_id, name FROM film_genres AS f " +
-                        "LEFT JOIN genres AS g ON f.GENRE_ID = g.GENRE_ID WHERE film_id = ?",
-                this::mapRowToGenre, id);
-        if (!genres.isEmpty()) {
-            film.setGenres(new LinkedHashSet<>(genres));
-        } else {
-            film.setGenres(null);
-        }
+        LinkedHashSet<Genre> genres = genreStorage.getListOfGenres(id);
+        film.setGenres(genres);
         return film;
     }
 
-    private Genre mapRowToGenre(ResultSet genreRows, int rowNum) throws SQLException {
-        int genreId = genreRows.getInt("genre_id");
-        Genre.GenreName genreName = Genre.GenreName.getEnum(genreRows.getString("name"));
-        return new Genre(genreId, genreName);
-    }
-
-    private Director mapRowToDirector(ResultSet directorRows, int rowNum) throws SQLException {
-        int id = directorRows.getInt("director_id");
-        String name = directorRows.getString("name");
-        return new Director(id, name);
-    }
-
-    private MPA mapRowToMpa(ResultSet mpaRows, int rowNum) throws SQLException {
-        int mpaId = mpaRows.getInt("mpa_id");
-        MPA.MPAName name = MPA.MPAName.valueOf(mpaRows.getString("name"));
-        return new MPA(mpaId, name);
+    private double getRate(int filmId) {
+        Double rate = jdbcTemplate.queryForObject("select (CAST(sum(rate) AS float) / " +
+                "CAST(count(FILM_ID) AS float)) from USER_LIKES where film_id = ?", Double.class, filmId);
+        if (rate != null) return rate;
+        else return 0.0;
     }
 }
