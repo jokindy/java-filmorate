@@ -29,5 +29,7 @@ public interface UserStorage {
 
     Collection<Event> getUserEvents(Integer userId);
 
+    int idUserMaxCommonFilms(int userId);
+
     boolean isContains(int id);
 }

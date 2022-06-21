@@ -43,7 +43,10 @@ public class GenreDbStorage {
         List<Genre> genres = jdbcTemplate.query("SELECT g.GENRE_ID AS genre_id, name FROM film_genres AS f " +
                         "LEFT JOIN genres AS g ON f.GENRE_ID = g.GENRE_ID WHERE film_id = ?",
                 this::mapRowToGenre, filmId);
-        if (!genres.isEmpty()) return new LinkedHashSet<>(genres);
-        else return null;
+        if (!genres.isEmpty()) {
+            return new LinkedHashSet<>(genres);
+        } else {
+            return null;
+        }
     }
 }

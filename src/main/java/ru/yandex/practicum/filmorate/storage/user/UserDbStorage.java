@@ -17,9 +17,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Component("UserDbStorage")
 public class UserDbStorage implements UserStorage {
@@ -153,6 +151,26 @@ public class UserDbStorage implements UserStorage {
     public Collection<Event> getUserEvents(Integer id) {
         String sql = "select * from EVENTS where USER_ID = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeEvent(rs), id);
+    }
+
+    @Override
+    public int idUserMaxCommonFilms(int userId) {
+        int id = 0;
+        int count = 0;
+        Map<Integer, Integer> countsFilms = new HashMap<>();
+        List<Integer> usersId = jdbcTemplate.queryForList("SELECT USER_ID FROM USERS", Integer.class);
+        for (Integer idU : usersId) {
+            if (userId != idU) {
+            //    countsFilms.put(idU, filmStorage.getCommonFilms(userId, idU).size());
+            }
+        }
+        for (Integer i : countsFilms.keySet()) {
+            if (countsFilms.get(i) > count) {
+                count = countsFilms.get(i);
+                id = i;
+            }
+        }
+        return id;
     }
 
     @Override

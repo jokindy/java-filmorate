@@ -29,6 +29,8 @@ public interface FilmStorage {
 
     Collection<Film> getDirectorFilms(int directorId, String sort);
 
+    Collection<Film> getRecommendationFilms(int userId);
+
     boolean isContains(int id);
 
     Collection<Film> getCommonFilms(int userId, int friendId);
