@@ -12,7 +12,7 @@ public class MPA {
     @EqualsAndHashCode.Exclude
     private String name;
 
-    public MPA(int id, MPAName name) {
+    public MPA(int id, Name name) {
         this.id = id;
         this.name = name.getName();
     }
@@ -20,16 +20,17 @@ public class MPA {
     public MPA() {
     }
 
-    public enum MPAName {
+    public enum Name {
         G("G"),
         PG("PG"),
         PG_13("PG-13"),
         R("R"),
-        NC_17("NC-17");
+        NC_17("NC-17"),
+        UNRATED("UNRATED");
 
         private final String name;
 
-        MPAName(String name) {
+        Name(String name) {
             this.name = name;
         }
 

@@ -5,8 +5,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.FilmDTO;
-import ru.yandex.practicum.filmorate.model.film.Genre;
-import ru.yandex.practicum.filmorate.model.film.MPA;
 import ru.yandex.practicum.filmorate.services.FilmService;
 
 import javax.validation.Valid;
@@ -88,30 +86,6 @@ public class FilmController {
     public Collection<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
         log.info("Get films by director id: {} by {}", directorId, sortBy);
         return filmService.getDirectorFilms(directorId, sortBy);
-    }
-
-    @GetMapping("/mpa/{filmId}")
-    public MPA getMpaById(@PathVariable int filmId) {
-        log.info("Get MPA by id: {}", filmId);
-        return filmService.getMpaByFilmId(filmId);
-    }
-
-    @GetMapping("/mpa")
-    public Collection<MPA> getAllMpa() {
-        log.info("Get all MPA");
-        return filmService.getAllMpa();
-    }
-
-    @GetMapping("/genres/{filmId}")
-    public Genre getGenreById(@PathVariable int filmId) {
-        log.info("Get genre by id: {}", filmId);
-        return filmService.getGenreById(filmId);
-    }
-
-    @GetMapping("/genres")
-    public Collection<Genre> getAllGenres() {
-        log.info("Get all genres");
-        return filmService.getAllGenres();
     }
 
     @GetMapping("/films/common")

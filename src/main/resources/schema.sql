@@ -12,7 +12,7 @@ create table IF NOT EXISTS FILMS
     RELEASE_DATE DATE,
     DURATION     INTEGER,
     RATE         NUMERIC(10, 2),
-    MPA_ID       INTEGER,
+    MPA          VARCHAR,
     DIRECTOR_ID  INTEGER,
     FOREIGN KEY (DIRECTOR_ID) REFERENCES DIRECTORS on delete set null
 );
@@ -31,13 +31,6 @@ create table IF NOT EXISTS GENRES
     NAME     CHARACTER VARYING
 );
 
-create table IF NOT EXISTS MPA
-(
-    MPA_ID INTEGER not null,
-    NAME   CHARACTER VARYING
-);
-
-
 create table IF NOT EXISTS USERS
 (
     USER_ID  INTEGER auto_increment primary key,
@@ -49,7 +42,7 @@ create table IF NOT EXISTS USERS
 
 CREATE TABLE IF NOT EXISTS FRIENDS
 (
-    FRIEND_ID INTEGER AUTO_INCREMENT,
+    FRIEND_ID INTEGER UNIQUE AUTO_INCREMENT,
     USER1_ID  INTEGER not null,
     USER2_ID  INTEGER not null,
     STATUS    BOOLEAN,
@@ -79,16 +72,14 @@ CREATE TABLE IF NOT EXISTS USER_LIKES
 
 CREATE TABLE IF NOT EXISTS EVENTS
 (
-    EVENT_ID   INTEGER auto_increment
-        primary key,
+    EVENT_ID   INTEGER auto_increment primary key,
     TIMESTAMP  TIMESTAMP,
     USER_ID    INTEGER
         references USERS
             on update cascade on delete cascade,
-    EVENT_TYPE ENUM ('LIKE', 'REVIEW', 'FRIEND'),
-    OPERATION  ENUM ('REMOVE', 'ADD', 'UPDATE'),
-    ENTITY_ID  INTEGER,
-    FOREIGN KEY (ENTITY_ID) REFERENCES USER_LIKES (LIKE_ID) on delete cascade
+    EVENT_TYPE VARCHAR,
+    OPERATION  VARCHAR,
+    ENTITY_ID  INTEGER
 );
 
 
@@ -130,12 +121,6 @@ CREATE TABLE IF NOT EXISTS REVIEWS_USEFUL
             on delete cascade
 );
 
-merge into mpa key (mpa_id)
-    values (1, 'G'),
-           (2, 'PG'),
-           (3, 'PG_13'),
-           (4, 'R'),
-           (5, 'NC_17');
 merge into GENRES key (GENRE_ID)
     values (1, 'Комедия'),
            (2, 'Драма'),

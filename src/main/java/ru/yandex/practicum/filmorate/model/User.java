@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 import javax.validation.constraints.*;
@@ -33,7 +32,7 @@ public class User {
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
         this.login = login;
-        if (name.isBlank()) {
+        if (name == null || name.isBlank()) {
             this.name = login;
         } else {
             this.name = name;
@@ -52,7 +51,7 @@ public class User {
     }
 
     private void validate() {
-        if (login != null && login.contains(" ")) {
+        if (login.contains(" ")) {
             throw new ValidationException("Login can't contains spaces");
         }
         if (birthday.isAfter(LocalDate.now())) {

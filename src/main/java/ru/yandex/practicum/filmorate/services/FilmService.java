@@ -18,8 +18,6 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final GenreDbStorage genreStorage;
-    private final MpaDbStorage mpaStorage;
     private final DirectorDbStorage directorStorage;
     private final UserService userService;
 
@@ -73,22 +71,6 @@ public class FilmService {
         return filmStorage.getPopularFilms(count, genreId, year);
     }
 
-    public MPA getMpaByFilmId(int filmId) {
-        return mpaStorage.getMpaById(filmId);
-    }
-
-    public Collection<MPA> getAllMpa() {
-        return mpaStorage.getAllMpa();
-    }
-
-    public Genre getGenreById(int filmId) {
-        return genreStorage.getGenreById(filmId);
-    }
-
-    public Collection<Genre> getAllGenres() {
-        return genreStorage.getAllGenres();
-    }
-
     public Collection<Film> getFilmsBySearch(String query, String by) {
         if (query == null && by == null) {
             log.info("Query and parameters not specified. Returning sorted films");
@@ -136,7 +118,7 @@ public class FilmService {
     }
 
     private void checkDirectorId(FilmDTO filmDTO) {
-        Integer directorId = filmDTO.getDirector().get(0).getId();
+        Integer directorId = filmDTO.getDirector().getId();
         if (directorId != null) {
             if (!directorStorage.isContains(directorId)) {
                 throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));

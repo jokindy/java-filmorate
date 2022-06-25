@@ -33,26 +33,25 @@ public class FilmDTO {
     @Positive(message = "Duration must be positive")
     private int duration;
 
+    @EqualsAndHashCode.Exclude
     private Double rate;
 
     @NotNull
-    private MPA mpa;
+    private MPA.Name mpa;
 
     private LinkedHashSet<Genre> genres;
 
-    private List<Director> director;
+    private Director director;
 
-    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, Double rate, MPA mpa,
-                   List<Director> director) {
+    public FilmDTO(String name, String description, LocalDate releaseDate, int duration, Double rate, MPA.Name mpa,
+                   Director director) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.rate = rate;
         this.mpa = mpa;
-        if (director == null || director.isEmpty()) {
-            this.director = List.of(new Director(null));
-        }
+        this.director = director;
         validate();
     }
 
