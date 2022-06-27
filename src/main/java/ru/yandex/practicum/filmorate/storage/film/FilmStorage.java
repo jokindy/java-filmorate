@@ -23,7 +23,7 @@ public interface FilmStorage {
 
     void putRate(int id, int userId, int rate);
 
-    void deleteLike(int id, int userId);
+    void deleteRate(int id, int userId);
 
     Collection<Film> getPopularFilms(int count, int genreId, int year);
 

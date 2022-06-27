@@ -47,41 +47,33 @@ public class ReviewController {
     }
 
     @GetMapping()
-    public Collection<Review> getReviewsByFilmId(
-            @Positive(message = "Count must be positive") @RequestParam(required = false, defaultValue = "10") int count,
-            @Positive(message = "filmId must be positive") @RequestParam(required = false, defaultValue = "0") int filmId) {
+    public Collection<Review> getReviewsByFilmId(@Positive(message = "Count must be positive")
+                                                 @RequestParam(required = false, defaultValue = "10") int count,
+                                                 @RequestParam(required = false, defaultValue = "0") int filmId) {
         log.info("Get reviews by filmId id: {}", filmId);
         return reviewService.getReviewsByFilmIdAndCount(filmId, count);
     }
 
     @PutMapping("{reviewId}/like/{userId}")
-    public String putLikeToReview(
-            @Positive(message = "Id must be positive") @PathVariable int reviewId,
-            @Positive(message = "Id must be positive") @PathVariable int userId) {
+    public String putLikeToReview(@PathVariable int reviewId, @PathVariable int userId) {
         log.info("Put like to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.putLike(reviewId, userId);
     }
 
     @PutMapping("{reviewId}/dislike/{userId}")
-    public String putDislikeToReview(
-            @Positive(message = "Id must be positive") @PathVariable int reviewId,
-            @Positive(message = "Id must be positive") @PathVariable int userId) {
+    public String putDislikeToReview(@PathVariable int reviewId, @PathVariable int userId) {
         log.info("Put dislike to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.putDislike(reviewId, userId);
     }
 
     @DeleteMapping("{reviewId}/like/{userId}")
-    public String deleteLikeToReview(
-            @Positive(message = "Id must be positive") @PathVariable int reviewId,
-            @Positive(message = "Id must be positive") @PathVariable int userId) {
+    public String deleteLikeToReview(@PathVariable int reviewId, @PathVariable int userId) {
         log.info("Delete like to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.deleteLike(reviewId, userId);
     }
 
     @DeleteMapping("{reviewId}/dislike/{userId}")
-    public String deleteDislikeToReview(
-            @Positive(message = "Id must be positive") @PathVariable int reviewId,
-            @Positive(message = "Id must be positive") @PathVariable int userId) {
+    public String deleteDislikeToReview(@PathVariable int reviewId, @PathVariable int userId) {
         log.info("Delete dislike to review by reviewId: {} and userId: {}", reviewId, userId);
         return reviewService.deleteDislike(reviewId, userId);
     }

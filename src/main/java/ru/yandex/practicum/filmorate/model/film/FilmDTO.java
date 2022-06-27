@@ -41,6 +41,7 @@ public class FilmDTO {
 
     private LinkedHashSet<Genre> genres;
 
+    @NotNull
     private Director director;
 
     public FilmDTO(String name, String description, LocalDate releaseDate, int duration, Double rate, MPA.Name mpa,

@@ -53,7 +53,7 @@ public class FilmService {
 
     public String deleteLike(int filmId, int userId) {
         checkIds(filmId, userId);
-        filmStorage.deleteLike(filmId, userId);
+        filmStorage.deleteRate(filmId, userId);
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 

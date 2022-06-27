@@ -100,19 +100,22 @@ public class FilmDbStorage implements FilmStorage {
             throw new ModelAlreadyExistException("Film already rated by user");
         }
         jdbc.update("INSERT INTO user_likes(film_id, user_id, rate) VALUES (?, ?, ?)", filmId, userId, rate);
+        updateRate(filmId);
         int likeId = getLikeId(userId, filmId);
         Event event = Event.getEvent(userId, LIKE, ADD, likeId);
         eventPublisher.publishEvent(event);
     }
 
     @Override
-    public void deleteLike(int filmId, int userId) {
+    public void deleteRate(int filmId, int userId) {
         List<Integer> userLikes = jdbc.queryForList("SELECT user_id FROM user_likes WHERE film_id = ?",
                 Integer.class, filmId);
         if (userLikes.contains(userId)) {
             jdbc.update("DELETE FROM user_likes WHERE film_id = ? AND user_id = ?", filmId, userId);
+            updateRate(filmId);
             int likeId = getLikeId(userId, filmId);
             Event event = Event.getEvent(userId, LIKE, REMOVE, likeId);
+            eventPublisher.publishEvent(event);
         } else {
             throw new ModelNotFoundException("Nothing to delete");
         }
@@ -222,7 +225,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         int id = rs.getInt("film_id");
-        updateRate(id);
         Film film = Film.builder()
                 .id(id)
                 .name(rs.getString("name"))
