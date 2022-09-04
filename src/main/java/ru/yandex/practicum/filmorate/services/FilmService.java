@@ -25,14 +25,14 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public void addFilm(FilmDTO filmDTO) {
-        checkDirectorId(filmDTO);
-        filmStorage.add(filmDTO);
+    public void addFilm(Film film) {
+        checkDirectorId(film);
+        filmStorage.add(film);
     }
 
-    public void putFilm(FilmDTO filmDTO) {
-        checkDirectorId(filmDTO);
-        filmStorage.put(filmDTO);
+    public void putFilm(Film film) {
+        checkDirectorId(film);
+        filmStorage.put(film);
     }
 
     public Film getFilm(int id) {
@@ -117,8 +117,8 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    private void checkDirectorId(FilmDTO filmDTO) {
-        Integer directorId = filmDTO.getDirector().getId();
+    private void checkDirectorId(Film film) {
+        Integer directorId = film.getDirector().getId();
         if (directorId != null) {
             if (!directorStorage.isContains(directorId)) {
                 throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));

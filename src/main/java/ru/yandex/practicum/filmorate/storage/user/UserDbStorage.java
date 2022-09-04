@@ -101,8 +101,9 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void confirmFriendship(int id, int friendId) {
         String sql = String.format("UPDATE friends SET status = true %s", checkSide(id, friendId));
+        System.out.println(sql);
         int friendshipId = getFriendshipId(id, friendId);
-        jdbc.update(sql, friendId, id);
+        jdbc.update(sql, id, friendId);
         Event event = Event.getEvent(friendId, FRIEND, UPDATE, friendshipId);
         eventPublisher.publishEvent(event);
     }

@@ -57,14 +57,14 @@ public class UserStorageTests {
     public void testPutFriendInvitation() {
         userStorage.add(commonUser2);
         userStorage.putFriendInvitation(1, 2);
-        Assertions.assertEquals(List.of(commonUser2), userStorage.getUserFriends(1));
+        Assertions.assertEquals(List.of(), userStorage.getUserFriends(1));
     }
 
 
     @Order(6)
     @Test
     public void testConfirmFriendInvitation() {
-        userStorage.confirmFriendship(1, 2);
+        userStorage.confirmFriendship(2, 1);
         Assertions.assertEquals(List.of(updatedUser1), userStorage.getUserFriends(2));
     }
 

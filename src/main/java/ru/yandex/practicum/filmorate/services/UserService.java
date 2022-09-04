@@ -2,11 +2,10 @@ package ru.yandex.practicum.filmorate.services;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.event.Event;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -73,11 +72,6 @@ public class UserService {
         } else {
             throw new ModelNotFoundException(String.format("User id: %s not found", userId));
         }
-    }
-
-    public Collection<Film> getRecommendations(int userId) {
-        storage.getUserById(userId);
-        return filmStorage.getRecommendationFilms(userId);
     }
 
     public void checkIds(int userId, int friendId) {

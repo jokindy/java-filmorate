@@ -5,6 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -16,27 +20,31 @@ public class Film {
 
     @EqualsAndHashCode.Exclude
     private int id;
+
+    @NotNull
+    @NotBlank(message = "Name may not be blank")
     private String name;
+
+    @NotNull
+    @Size(max = 200)
+    @NotBlank(message = "Description may not be blank")
     private String description;
+
+    @NotNull
     private LocalDate releaseDate;
+
+    @NotNull
+    @Positive(message = "Duration must be positive")
     private int duration;
+
     @EqualsAndHashCode.Exclude
     private Double rate;
-    private MPA.Name mpa;
-    private LinkedHashSet<Genre> genres;
-    private Director director;
 
-    public Film(FilmDTO filmDTO) {
-        this.id = filmDTO.getId();
-        this.name = filmDTO.getName();
-        this.description = filmDTO.getDescription();
-        this.releaseDate = filmDTO.getReleaseDate();
-        this.duration = filmDTO.getDuration();
-        this.rate = filmDTO.getRate();
-        this.mpa = filmDTO.getMpa();
-        this.genres = filmDTO.getGenres();
-        this.director = filmDTO.getDirector();
-    }
+    private MPA mpa;
+
+    private LinkedHashSet<Genre> genres;
+
+    private Director director;
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();

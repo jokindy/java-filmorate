@@ -12,14 +12,18 @@ import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.event.Event;
-import ru.yandex.practicum.filmorate.model.film.*;
+import ru.yandex.practicum.filmorate.model.film.Director;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.MPA;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import static ru.yandex.practicum.filmorate.model.event.EventType.*;
-import static ru.yandex.practicum.filmorate.model.event.Operation.*;
+import static ru.yandex.practicum.filmorate.model.event.EventType.LIKE;
+import static ru.yandex.practicum.filmorate.model.event.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.event.Operation.REMOVE;
 
 @Slf4j
 @AllArgsConstructor
@@ -32,15 +36,14 @@ public class FilmDbStorage implements FilmStorage {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public void add(FilmDTO filmDTO) {
-        Film film = new Film(filmDTO);
+    public void add(Film film) {
         Collection<Film> films = getFilms();
         if (!films.contains(film)) {
             SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
                     .withTableName("films")
                     .usingGeneratedKeyColumns("film_id");
             int filmId = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
-            filmDTO.setId(filmId);
+            film.setId(filmId);
             handleGenres(film, filmId);
         } else {
             throw new ModelAlreadyExistException("This film is already added");
@@ -57,8 +60,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void put(FilmDTO filmDTO) {
-        Film film = new Film(filmDTO);
+    public void put(Film film) {
         int filmId = film.getId();
         Film anotherFilm = getFilmById(filmId);
         if (film.equals(anotherFilm)) {
@@ -66,7 +68,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         jdbc.update("UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
                         "rate = ?, MPA = ?, DIRECTOR_ID = ? WHERE film_id = ?", film.getName(), film.getDescription(),
-                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa(),
+                film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().toString(),
                 film.getDirector().getId(), filmId);
         jdbc.update("DELETE FROM film_genres WHERE film_id = ?", filmId);
         handleGenres(film, filmId);
@@ -203,26 +205,6 @@ public class FilmDbStorage implements FilmStorage {
                 this::mapRowToFilm, userId, friendId);
     }
 
-    @Override
-    public Collection<Film> getRecommendationFilms(int userId) {
-        String sql = "select f.FILM_ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.RATE, \n" +
-                "       f.MPA, f.DIRECTOR_ID " +
-                "from FILMS AS f\n" +
-                "right join (select ul.film_id, sum(fr.rank) AS total_rank\n" +
-                "           from (select ul.user_id, count(*) rank\n" +
-                "                 from USER_LIKES AS target\n" +
-                "                          left join USER_LIKES AS ul on target.FILM_ID = ul.FILM_ID\n" +
-                "                     AND target.user_id != ul.user_id\n" +
-                "                 where target.user_id = ? AND target.rate > 5\n" +
-                "                 group by ul.user_id) AS fr\n" +
-                "                    join USER_LIKES AS ul on fr.user_id = ul.user_id\n" +
-                "                    left join USER_LIKES AS target on target.user_id = ? \n" +
-                "                                                          and target.film_id = ul.film_id\n" +
-                "           where target.film_id is null\n" +
-                "           group by ul.film_id) AS r on f.FILM_ID = r.FILM_ID";
-        return jdbc.query(sql, this::mapRowToFilm, userId, userId);
-    }
-
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         int id = rs.getInt("film_id");
         Film film = Film.builder()
@@ -232,7 +214,7 @@ public class FilmDbStorage implements FilmStorage {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .rate(rs.getDouble("rate"))
-                .mpa(MPA.Name.valueOf(rs.getString("mpa")))
+                .mpa(MPA.valueOf(rs.getString("MPA")))
                 .genres(genreStorage.getListOfGenres(id))
                 .build();
         int directorId = rs.getInt("director_id");

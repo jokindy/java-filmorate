@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
@@ -38,11 +39,18 @@ public class ReviewService {
     }
 
     public Collection<Review> getReviewsByFilmIdAndCount(int filmId, int count) {
+        if (!filmStorage.isContains(filmId)) {
+            throw new ModelNotFoundException(String.format("Film with id: %d not found", filmId));
+        }
         return reviewStorage.getReviewsByFilmIdAndCount(filmId, count);
     }
 
     public String putLike(int reviewId, int userId) {
         checkIds(reviewId, userId);
+        int authorId = getReview(reviewId).getUserId();
+        if (authorId == userId) {
+            throw new SameIdException(String.format("User with id: %d can't rate his review", userId));
+        }
         reviewStorage.putUseful(reviewId, userId, +1);
         return String.format("User with id: %d put like to review with id: %d", userId, reviewId);
     }
