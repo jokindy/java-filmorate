@@ -27,7 +27,7 @@ public interface UserStorage {
 
     Collection<User> getUsers();
 
-    Collection<Event> getUserEvents(Integer userId);
+    Collection<Event> getUserEvents(int userId);
 
     boolean isContains(int id);
 }

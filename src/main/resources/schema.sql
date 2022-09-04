@@ -11,8 +11,8 @@ create table IF NOT EXISTS FILMS
     DESCRIPTION  CHARACTER VARYING(200),
     RELEASE_DATE DATE,
     DURATION     INTEGER,
-    RATE         INTEGER,
-    MPA_ID       INTEGER,
+    RATE         NUMERIC(10, 2),
+    MPA          VARCHAR,
     DIRECTOR_ID  INTEGER,
     FOREIGN KEY (DIRECTOR_ID) REFERENCES DIRECTORS on delete set null
 );
@@ -21,8 +21,8 @@ create table IF NOT EXISTS FILM_GENRES
 (
     FILM_ID  INTEGER not null,
     GENRE_ID INTEGER not null,
-        foreign key (FILM_ID) references FILMS (FILM_ID)
-            on update cascade on delete cascade
+    foreign key (FILM_ID) references FILMS (FILM_ID)
+        on update cascade on delete cascade
 );
 
 create table IF NOT EXISTS GENRES
@@ -30,13 +30,6 @@ create table IF NOT EXISTS GENRES
     GENRE_ID INTEGER,
     NAME     CHARACTER VARYING
 );
-
-create table IF NOT EXISTS MPA
-(
-    MPA_ID INTEGER not null,
-    NAME   CHARACTER VARYING
-);
-
 
 create table IF NOT EXISTS USERS
 (
@@ -49,7 +42,7 @@ create table IF NOT EXISTS USERS
 
 CREATE TABLE IF NOT EXISTS FRIENDS
 (
-    FRIEND_ID INTEGER AUTO_INCREMENT,
+    FRIEND_ID INTEGER UNIQUE AUTO_INCREMENT,
     USER1_ID  INTEGER not null,
     USER2_ID  INTEGER not null,
     STATUS    BOOLEAN,
@@ -62,28 +55,13 @@ CREATE TABLE IF NOT EXISTS FRIENDS
             on delete cascade
 );
 
-CREATE TABLE IF NOT EXISTS EVENTS
-(
-    EVENT_ID   INTEGER auto_increment
-        primary key,
-    TIMESTAMP  TIMESTAMP,
-    USER_ID    INTEGER
-        references USERS
-            on update cascade on delete cascade,
-    EVENT_TYPE ENUM ('LIKE', 'REVIEW', 'FRIEND'),
-    OPERATION  ENUM ('REMOVE', 'ADD', 'UPDATE'),
-    ENTITY_ID  INTEGER
-);
-
 CREATE TABLE IF NOT EXISTS USER_LIKES
 (
-    LIKE_ID INTEGER auto_increment,
+    LIKE_ID INTEGER UNIQUE auto_increment,
     FILM_ID INTEGER not null,
     USER_ID INTEGER not null,
+    RATE    INTEGER,
     primary key (LIKE_ID, FILM_ID, USER_ID),
-    constraint LIKE_ID
-        foreign key (LIKE_ID) references EVENTS
-            on update cascade on delete cascade,
     constraint USER_LIKES_FILMS_FILM_ID_FK
         foreign key (FILM_ID) references FILMS (FILM_ID)
             on update cascade on delete cascade,
@@ -91,6 +69,20 @@ CREATE TABLE IF NOT EXISTS USER_LIKES
         foreign key (USER_ID) references USERS
             on update cascade on delete cascade
 );
+
+CREATE TABLE IF NOT EXISTS EVENTS
+(
+    EVENT_ID   INTEGER auto_increment primary key,
+    TIMESTAMP  TIMESTAMP,
+    USER_ID    INTEGER
+        references USERS
+            on update cascade on delete cascade,
+    EVENT_TYPE VARCHAR,
+    OPERATION  VARCHAR,
+    ENTITY_ID  INTEGER
+);
+
+
 
 create table IF NOT EXISTS DIRECTORS
 (
@@ -129,12 +121,6 @@ CREATE TABLE IF NOT EXISTS REVIEWS_USEFUL
             on delete cascade
 );
 
-merge into mpa key (mpa_id)
-    values (1, 'G'),
-           (2, 'PG'),
-           (3, 'PG_13'),
-           (4, 'R'),
-           (5, 'NC_17');
 merge into GENRES key (GENRE_ID)
     values (1, 'Комедия'),
            (2, 'Драма'),

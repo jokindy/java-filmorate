@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.*;
 import ru.yandex.practicum.filmorate.storage.film.*;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -17,8 +18,6 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final GenreDbStorage genreStorage;
-    private final MpaDbStorage mpaStorage;
     private final DirectorDbStorage directorStorage;
     private final UserService userService;
 
@@ -26,14 +25,14 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public void addFilm(FilmDTO filmDTO) {
-        checkDirectorId(filmDTO);
-        filmStorage.add(filmDTO);
+    public void addFilm(Film film) {
+        checkDirectorId(film);
+        filmStorage.add(film);
     }
 
-    public void putFilm(FilmDTO filmDTO) {
-        checkDirectorId(filmDTO);
-        filmStorage.put(filmDTO);
+    public void putFilm(Film film) {
+        checkDirectorId(film);
+        filmStorage.put(film);
     }
 
     public Film getFilm(int id) {
@@ -45,15 +44,16 @@ public class FilmService {
         return "Film id: " + id + " deleted";
     }
 
-    public String putLike(int filmId, int userId) {
+    public String putRate(int filmId, int userId, int rate) {
         checkIds(filmId, userId);
-        filmStorage.putLike(filmId, userId);
-        return String.format("User id: %s put like to film id: %s", userId, filmId);
+        if (rate < 1 || rate > 10) throw new ValidationException("Not valid rate");
+        filmStorage.putRate(filmId, userId, rate);
+        return String.format("User id: %s put rate %s to film id: %s", userId, rate, filmId);
     }
 
     public String deleteLike(int filmId, int userId) {
         checkIds(filmId, userId);
-        filmStorage.deleteLike(filmId, userId);
+        filmStorage.deleteRate(filmId, userId);
         return String.format("User id: %s deleted like from film id: %s", userId, filmId);
     }
 
@@ -69,23 +69,6 @@ public class FilmService {
 
     public Collection<Film> getPopularFilms(int count, int genreId, int year) {
         return filmStorage.getPopularFilms(count, genreId, year);
-
-    }
-
-    public MPA getMpaByFilmId(int filmId) {
-        return mpaStorage.getMpaById(filmId);
-    }
-
-    public Collection<MPA> getAllMpa() {
-        return mpaStorage.getAllMpa();
-    }
-
-    public Genre getGenreById(int filmId) {
-        return genreStorage.getGenreById(filmId);
-    }
-
-    public Collection<Genre> getAllGenres() {
-        return genreStorage.getAllGenres();
     }
 
     public Collection<Film> getFilmsBySearch(String query, String by) {
@@ -134,8 +117,8 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId);
     }
 
-    private void checkDirectorId(FilmDTO filmDTO) {
-        Integer directorId = filmDTO.getDirector().get(0).getId();
+    private void checkDirectorId(Film film) {
+        Integer directorId = film.getDirector().getId();
         if (directorId != null) {
             if (!directorStorage.isContains(directorId)) {
                 throw new ModelNotFoundException(String.format("Director id: %s not found", directorId));

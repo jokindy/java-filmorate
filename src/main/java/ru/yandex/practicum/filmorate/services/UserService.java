@@ -1,23 +1,22 @@
 package ru.yandex.practicum.filmorate.services;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
-import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.exceptions.SameIdException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event.Event;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserStorage storage;
-
-    public UserService(@Qualifier("UserDbStorage") UserStorage storage) {
-        this.storage = storage;
-    }
+    private final FilmStorage filmStorage;
 
     public Collection<User> getUsers() {
         return storage.getUsers();

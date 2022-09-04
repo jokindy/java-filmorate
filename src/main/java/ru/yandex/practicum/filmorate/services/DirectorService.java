@@ -28,7 +28,7 @@ public class DirectorService {
     }
 
     public Director getDirector(int id) {
-        return storage.getDirectorById(id);
+        return storage.getDirectorById(id, false);
     }
 
     public String deleteDirector(int id) {

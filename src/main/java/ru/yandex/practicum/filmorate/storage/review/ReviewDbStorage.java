@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -9,17 +10,24 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ModelAlreadyExistException;
 import ru.yandex.practicum.filmorate.exceptions.ModelNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.event.Event;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static ru.yandex.practicum.filmorate.model.event.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.event.Operation.*;
 
 @Component
 @AllArgsConstructor
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbc;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void addReview(Review review) {
@@ -31,8 +39,8 @@ public class ReviewDbStorage implements ReviewStorage {
             review.setUseful(0);
             int reviewId = simpleJdbcInsert.executeAndReturnKey(review.toMap()).intValue();
             review.setReviewId(reviewId);
-            jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                    "VALUES (now(), ?, 'REVIEW', 'ADD', ?)", review.getUserId(), review.getReviewId());
+            Event event = Event.getEvent(review.getUserId(), REVIEW, ADD, reviewId);
+            eventPublisher.publishEvent(event);
         } else {
             throw new ModelAlreadyExistException("This review is already added");
         }
@@ -54,8 +62,8 @@ public class ReviewDbStorage implements ReviewStorage {
                         "WHERE review_id = ?", review.getContent(), review.isPositive(), review.getUserId(),
                 review.getFilmId(), usefulByReviewId, review.getReviewId());
         review.setUseful(usefulByReviewId);
-        jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                "VALUES (now(), ?, 'REVIEW', 'UPDATE', ?)", review.getUserId(), review.getReviewId());
+        Event event = Event.getEvent(review.getUserId(), REVIEW, UPDATE, reviewId);
+        eventPublisher.publishEvent(event);
     }
 
     private Integer getUsefulByReviewId(int reviewId) {
@@ -68,8 +76,8 @@ public class ReviewDbStorage implements ReviewStorage {
     public void deleteReview(int reviewId) {
         Review review = getReviewById(reviewId);
         jdbc.update("DELETE FROM reviews WHERE review_id = ?", reviewId);
-        jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                "VALUES (now(), ?, 'REVIEW', 'REMOVE', ?)", review.getUserId(), reviewId);
+        Event event = Event.getEvent(review.getUserId(), REVIEW, REMOVE, reviewId);
+        eventPublisher.publishEvent(event);
     }
 
     @Override
@@ -92,43 +100,35 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public void putUseful(int reviewId, int userId, int useful) {
-        Integer usefulInDb = jdbc.queryForObject("SELECT useful FROM reviews_useful WHERE review_id = ? " +
-                "AND user_id = ?", Integer.class, reviewId, userId);
-        if (usefulInDb != null) {
-            if (usefulInDb == useful) {
-                throw new ModelAlreadyExistException(String.format("Useful: %s already set by this user", useful));
-            } else {
-                jdbc.update("UPDATE reviews_useful SET useful = ? WHERE review_id = ? AND user_id = ?",
-                        useful, reviewId, userId);
-                jdbc.update("UPDATE reviews SET useful = useful + ? WHERE review_id = ?",
-                        useful * 2, reviewId);
-            }
-        } else {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
-                    .withTableName("reviews_useful")
-                    .usingGeneratedKeyColumns("useful_id");
-            simpleJdbcInsert.execute(Map.of("review_id", reviewId, "user_id", userId, "useful", useful));
-            jdbc.update("UPDATE reviews SET useful = useful + ? WHERE review_id = ?",
-                    useful, reviewId);
+        List<Integer> userLikes = jdbc.queryForList("SELECT user_id FROM reviews_useful WHERE review_id = ?",
+                Integer.class, reviewId);
+        if (userLikes.contains(userId)) {
+            throw new ModelAlreadyExistException("Review already rated by user");
         }
-        jdbc.update("INSERT INTO EVENTS(TIMESTAMP, USER_ID, EVENT_TYPE, OPERATION, ENTITY_ID) " +
-                "VALUES (now(), ?, 'REVIEW', 'UPDATE', ?)", userId, reviewId);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbc)
+                .withTableName("reviews_useful")
+                .usingGeneratedKeyColumns("useful_id");
+        int usefulId = simpleJdbcInsert.executeAndReturnKey(Map.of("review_id", reviewId, "user_id",
+                userId, "useful", useful)).intValue();
+        updateUseful(reviewId);
+        Event event = Event.getEvent(userId, REVIEW, UPDATE, reviewId);
+        eventPublisher.publishEvent(event);
     }
 
     @Override
     public void deleteUseful(int reviewId, int userId, int useful) {
         Integer usefulInDb;
         try {
-            usefulInDb = jdbc.queryForObject(
-                    "SELECT useful FROM reviews_useful WHERE review_id = ? AND user_id = ?",
+            usefulInDb = jdbc.queryForObject("SELECT useful FROM reviews_useful WHERE review_id = ? AND user_id = ?",
                     Integer.class, reviewId, userId);
         } catch (EmptyResultDataAccessException e) {
             throw new ModelNotFoundException("Nothing to delete");
         }
         if (usefulInDb != null && usefulInDb == useful) {
             jdbc.update("DELETE FROM reviews_useful WHERE review_id = ? AND user_id = ?", reviewId, userId);
-            jdbc.update("UPDATE reviews SET useful = useful - ? WHERE review_id = ?",
-                    useful, reviewId);
+            updateUseful(reviewId);
+            Event event = Event.getEvent(userId, REVIEW, REMOVE, reviewId);
+            eventPublisher.publishEvent(event);
         }
     }
 
@@ -136,6 +136,13 @@ public class ReviewDbStorage implements ReviewStorage {
     public boolean isContains(int reviewId) {
         SqlRowSet rowSet = jdbc.queryForRowSet("SELECT * FROM reviews WHERE review_id = ?", reviewId);
         return rowSet.next();
+    }
+
+    private void updateUseful(int reviewId) {
+        Integer useful = jdbc.queryForObject("SELECT sum(useful) FROM reviews_useful " +
+                "WHERE review_id = ?", Integer.class, reviewId);
+        useful = Objects.requireNonNullElse(useful, 0);
+        jdbc.update("UPDATE reviews SET useful = ? WHERE review_id = ?", useful, reviewId);
     }
 
     private Review mapRowToReview(ResultSet resultSet, int i) throws SQLException {

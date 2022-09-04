@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,6 +27,13 @@ public class ErrorHandler {
     public ErrorResponse handleModelAlreadyExistException(final ModelAlreadyExistException e) {
         log.warn(e.getMessage());
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHttpMessageNotReadableExceptionException(final HttpMessageNotReadableException e) {
+        log.warn(String.valueOf(e.getCause()));
+        return new ErrorResponse(String.valueOf(e.getCause().getLocalizedMessage()));
     }
 
     @ExceptionHandler

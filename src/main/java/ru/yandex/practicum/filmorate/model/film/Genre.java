@@ -12,7 +12,7 @@ public class Genre {
     @EqualsAndHashCode.Exclude
     private String name;
 
-    public Genre(int id, GenreName name) {
+    public Genre(int id, Name name) {
         this.id = id;
         this.name = name.getName();
     }
@@ -20,7 +20,7 @@ public class Genre {
     public Genre() {
     }
 
-    public enum GenreName {
+    public enum Name {
         COMEDY("Комедия"),
         DRAMA("Драма"),
         CARTOON("Мультфильм"),
@@ -30,7 +30,7 @@ public class Genre {
 
         private final String name;
 
-        GenreName(String name) {
+        Name(String name) {
             this.name = name;
         }
 
@@ -38,8 +38,8 @@ public class Genre {
             return name;
         }
 
-        public static GenreName getEnum(String value) {
-            for (GenreName v : values()) {
+        public static Name getEnum(String value) {
+            for (Name v : values()) {
                 if (v.getName().equalsIgnoreCase(value)) {
                     return v;
                 }

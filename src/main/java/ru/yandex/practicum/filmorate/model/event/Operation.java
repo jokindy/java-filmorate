@@ -1,5 +1,5 @@
 package ru.yandex.practicum.filmorate.model.event;
 
-public enum Operations {
+public enum Operation {
     ADD, REMOVE, UPDATE
 }
